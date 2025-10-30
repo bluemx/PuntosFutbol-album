@@ -5,13 +5,13 @@
 
     <div id="album" ref="albumRef" class="w-full">
         <div class="page page-cover page-cover-top" data-density="hard">
-            <div class="page-content h-full card rounded-l-none" :style="bgStyle('/pages/cover.webp')">
+            <div class="page-content h-full card rounded-l-none" :style="bgStyle(coverImage)">
                 <img src="/logow-anim.svg" class="w-60 mx-auto animate-pulse" />
             </div>
         </div>
 
         <div class="page page-cover page-cover-top relative" >
-            <div class="page-content h-full  flex flex-col justify-evenly items-center card rounded-r-none"  :style="bgStyle('pages/cover_back.webp')">
+            <div class="page-content h-full  flex flex-col justify-evenly items-center card rounded-r-none"  :style="bgStyle(coverBackImage)">
                 <AlbumIndex /> 
             </div>
         </div>
@@ -22,7 +22,7 @@
         <!-- PAGES # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # -->
         
         <div class="page page-cover page-cover-bottom"  data-density="hard">
-            <div class="page-content h-full bg-amber-600 bg-cover bg-center card rounded-l-none"  :style="bgStyle('/pages/back.webp')" >
+            <div class="page-content h-full bg-amber-600 bg-cover bg-center card rounded-l-none"  :style="bgStyle(backImage)" >
             </div>
         </div>
     </div>
@@ -37,6 +37,10 @@ import Page from './Page.vue';
 import UserProfile from './UserProfile.vue';
 import AlbumIndex from './AlbumIndex.vue';
 
+// Use proper asset paths for public folder assets
+const coverImage = `${import.meta.env.BASE_URL}pages/cover.webp`;
+const coverBackImage = `${import.meta.env.BASE_URL}pages/cover_back.webp`;
+const backImage = `${import.meta.env.BASE_URL}pages/back.webp`;
 
 
 const albumStore = useAlbumStore();

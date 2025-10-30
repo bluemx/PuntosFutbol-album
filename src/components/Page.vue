@@ -1,6 +1,6 @@
 <template>
     <div class="page relative innerpage card p-0 overflow-hidden" >
-        <div class="page-content flex flex-col h-full  " :style="bgStyle('/pages/page'+thisPage+'.webp')">
+        <div class="page-content flex flex-col h-full  " :style="bgStyle(getPageImageUrl())">
             
             <h2 v-if="categoryName" class="badge mx-auto pt-1 -mt-1 bg-blue-500">{{ categoryName }}</h2>
             
@@ -48,8 +48,12 @@ const pageCards = computed(() => {
   return info?.cards || []
 })
 
-
-
+const getPageImageUrl = () => {
+  if (!props.thisPage) return ''
+  // Use import.meta.env.BASE_URL to handle the base path correctly
+  const basePath = import.meta.env.BASE_URL
+  return `${basePath}pages/page${props.thisPage}.webp`
+}
 
 function bgStyle(url: string) {
     return url ? {
