@@ -9,7 +9,6 @@ export default defineConfig({
     port: 3593,
     allowedHosts: ['puntosfutbol.albumdigital'],
   },
-  plugins: [vue(), tailwindcss(),
-    
-],
+  plugins: [vue(), tailwindcss()],
+  base: '/PuntosFutbol-album/',
 })
