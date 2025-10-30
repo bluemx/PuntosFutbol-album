@@ -90,7 +90,7 @@ import defaultOverlay from '../assets/cards/overlay.webp';
 import backCover from '../assets/cards/back.webp';
 import borderTop from '../assets/cards/borderT.svg';
 import borderBottom from '../assets/cards/borderB.svg';
-import pfIcon from '../assets/cards/pfIcon.svg';
+import pfIcon from '../assets/cards/pficon.svg';
 import idBg from '../assets/cards/idBg.svg';
 
 const imageLoaded = ref(false)
