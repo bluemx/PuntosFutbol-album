@@ -10,5 +10,5 @@ export default defineConfig({
     allowedHosts: ['puntosfutbol.albumdigital'],
   },
   plugins: [vue(), tailwindcss()],
-  base: '/PuntosFutbol-album/',
+  //base: '/PuntosFutbol-album/',
 })
