@@ -163,10 +163,14 @@ export function distributeCardsIntoPages(): {
         const card = categoryCards[cardIndex];
         if (card) {
           const cardWithPage: CardWithPage = {
+            acRegId: card.acRegId,
             identifier: card.identifier,
             category: card.category,
             desc: card.desc,
             disposition: card.disposition,
+            metal: card.metal,
+            anim: card.anim,
+            has3d: card.has3d,
             page: currentPageNumber,
             positionInPage: j + 1
           };

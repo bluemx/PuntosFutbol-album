@@ -72,11 +72,7 @@ interface SendGiftStickerItem {
   ACRegId: number
 }
 
-interface SendGiftPayload {
-  customerId: string
-  customerFriendId: number
-  stickers: SendGiftStickerItem[]
-}
+// Removed unused SendGiftPayload interface
 
 interface SendGiftData {
   message: string
@@ -94,11 +90,7 @@ interface ExchangeWantedItem {
   ACRegId: number
 }
 
-interface TryExchangePayload {
-  customerId: number
-  offer: ExchangeOfferItem[]
-  wanted: ExchangeWantedItem[]
-}
+// Removed unused TryExchangePayload interface
 
 export interface ExchangeMatch {
   resultId: number
@@ -124,10 +116,7 @@ export interface CurrentExchange {
 
 type CurrentExchangesResponse = ApiEnvelope<CurrentExchange[]>
 
-interface CompleteExchangePayload {
-  CustomerIdCompleted: number
-  ExchangeId: number
-}
+// Removed unused CompleteExchangePayload interface
 
 interface CompleteExchangeData {
   message: string
