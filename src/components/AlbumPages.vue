@@ -1,5 +1,5 @@
 <template>
-<div class="w-full max-w-6xl mx-auto p-0.5 md:p-4 rounded-xl card bg-pattern relative my-20">
+<div class="w-full max-w-6xl mx-auto p-0.5 md:p-4 rounded-xl relative my-20 select-none">
 
     <UserProfile :class="{ 'z-0': albumStore.isFirstPage }" />
 
@@ -12,11 +12,13 @@
 
         <div class="page page-cover page-cover-top relative" >
             <div class="page-content h-full  flex flex-col justify-evenly items-center card rounded-r-none"  :style="bgStyle(coverBackImage)">
-                <AlbumIndex /> 
+                <div class="max-w-md mx-auto">
+                    <AlbumIndex /> 
+                </div>
             </div>
         </div>
         <!-- PAGES # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # -->
-        <template v-for="page in albumStore.totalPages">
+        <template v-for="page in albumStore.totalPages" :key="`page-${page}`">
             <Page :this-page="page" />
         </template>
         <!-- PAGES # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # -->

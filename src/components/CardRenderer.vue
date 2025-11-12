@@ -2,7 +2,7 @@
 
   <div 
     ref="cardElement"
-    class="cardview card-3d w-full relative overflow-hidden max-w-2/3 sm:max-w-2/3 md:max-w-2/3 rounded-[6%]" 
+    class="cardview card-3d w-full relative overflow-hidden  rounded-[6%]" 
     v-if="props.base" 
     :class="ifCardClasses"
     @imageLoaded="handleImageLoaded"
@@ -67,10 +67,11 @@
             <img :src="borderBottom" class="cardRenderer-borders absolute left-0 bottom-0 w-full">
             <img :src="pfIcon" class="absolute top-1 right-1 aspect-square w-1/5" />
             
-            <div class="absolute left-1 bottom-1 min-w-10 w-1/5 aspect-square  text-center font-bold flex justify-center items-center text-xs text-pfblue ">
-              <span class="relative z-10 ">{{ identifier }}</span>
-              <img :src="idBg" class="absolute w-full object-cover z-0" />
-            </div>
+            <IdentifierBadge 
+              v-if="identifier" 
+              :identifier="identifier" 
+              class="absolute left-1 bottom-1" 
+            />
 
         </div>
       </div>
@@ -91,7 +92,7 @@ import backCover from '../assets/cards/back.webp';
 import borderTop from '../assets/cards/borderT.svg';
 import borderBottom from '../assets/cards/borderB.svg';
 import pfIcon from '../assets/cards/pficon.svg';
-import idBg from '../assets/cards/idbg.svg';
+import IdentifierBadge from './IdentifierBadge.vue';
 
 const imageLoaded = ref(false)
 const cardElement = ref<HTMLElement>()
@@ -124,7 +125,9 @@ const props = defineProps<Props>();
 // Determine orientation from disposition prop
 const orientation = computed<'vertical' | 'horizontal'>(() => {
   if (!props.disposition) return 'vertical' // Default fallback
-  return props.disposition.toLowerCase() === 'horizontal' ? 'horizontal' : 'vertical'
+  const disp = props.disposition.toLowerCase()
+  // Check if disposition starts with 'horizontal'
+  return disp.startsWith('horizontal') ? 'horizontal' : 'vertical'
 })
 
 const aspectClass = computed(() =>

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { apiService } from '../services/api'
+import { apiService, type StickerToView } from '../services/api'
 
 // Keep the full UserCard structure from API
 export interface UserCard {
@@ -10,6 +10,12 @@ export interface UserCard {
   token: number
   type: string
   inAlbum: boolean
+  acRegId: number
+}
+
+export interface PackToOpen {
+  packTypeId: number
+  packs: number
 }
 
 export const useUserStore = defineStore('user', () => {
@@ -17,15 +23,35 @@ export const useUserStore = defineStore('user', () => {
   const customerId = ref<string>('')
   const name = ref<string>('')
   const avatar = ref<string>('')
-  const envelopes = ref<number>(0)
+  const packsToOpen = ref<PackToOpen[]>([])
   const ownedCards = ref<UserCard[]>([])
+  const stickersToView = ref<StickerToView[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
   
 
   // Getters
   const isLoggedIn = computed(() => customerId.value !== '')
-  const totalOwnedCards = computed(() => ownedCards.value.length)
+  const totalOwnedCards = computed(() => 
+    ownedCards.value.filter(card => card.inAlbum).length
+  )
+  
+  // Get total packs count (all pack types)
+  const totalPacks = computed(() => 
+    packsToOpen.value.reduce((sum, pack) => sum + pack.packs, 0)
+  )
+  
+  // Get count of default packs (packTypeId: 1)
+  const defaultPacks = computed(() => {
+    const pack = packsToOpen.value.find(p => p.packTypeId === 1)
+    return pack ? pack.packs : 0
+  })
+  
+  // Get count of golden packs (packTypeId: 2)
+  const goldenPacks = computed(() => {
+    const pack = packsToOpen.value.find(p => p.packTypeId === 2)
+    return pack ? pack.packs : 0
+  })
   
 
   // Check whether the user has placed this album card into their album.
@@ -58,9 +84,9 @@ export const useUserStore = defineStore('user', () => {
   }
   
   const getCardQuantity = computed(() => (cardIdentifier: number) => {
-    // Count how many times this card identifier appears (for duplicates at same position)
+    // Count how many times this card identifier appears in the album (inAlbum: true)
     return ownedCards.value.filter(card => 
-      card.identifier && Number(card.identifier) === cardIdentifier
+      card.identifier && Number(card.identifier) === cardIdentifier && card.inAlbum
     ).length
   })
 
@@ -78,9 +104,10 @@ export const useUserStore = defineStore('user', () => {
       customerId.value = String(response.data.id)
         name.value = String(response.data.name)
         avatar.value = String(response.data.avatar)
-        envelopes.value = Number(response.data.envelopes) || 0
+        packsToOpen.value = response.data.packsToOpen || []
       // Keep the entire UserCard structure intact
       ownedCards.value = response.data.userCards || []
+      stickersToView.value = response.data.stickersToView || []
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to load user data'
       throw err
@@ -121,12 +148,24 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  const openPack = async () => {
-    if (!customerId.value || envelopes.value <= 0) return null
+  const openPack = async (packTypeId: number = 1) => {
+    if (!customerId.value || totalPacks.value <= 0) return null
+    
+    // Check if the specific pack type is available
+    const packIndex = packsToOpen.value.findIndex(p => p.packTypeId === packTypeId)
+    const pack = packIndex !== -1 ? packsToOpen.value[packIndex] : null
+    if (!pack || pack.packs <= 0) {
+      // If requested pack type not available, try default pack
+      const defaultPackIndex = packsToOpen.value.findIndex(p => p.packTypeId === 1)
+      const defaultPack = defaultPackIndex !== -1 ? packsToOpen.value[defaultPackIndex] : null
+      if (!defaultPack || defaultPack.packs <= 0) {
+        return null
+      }
+    }
     
     try {
       isLoading.value = true
-      const response = await apiService.openPack(customerId.value)
+      const response = await apiService.openPack(customerId.value, packTypeId)
       if (!response.success) {
         throw new Error(response.errorDescription || 'Failed to open pack')
       }
@@ -135,8 +174,11 @@ export const useUserStore = defineStore('user', () => {
       const newCards = response.data.userCards || []
       ownedCards.value.push(...newCards)
       
-      // Decrease envelope count
-      envelopes.value = Math.max(0, envelopes.value - 1)
+      // Decrease pack count for the specific pack type
+      const packToUpdate = packsToOpen.value.find(p => p.packTypeId === packTypeId)
+      if (packToUpdate) {
+        packToUpdate.packs = Math.max(0, packToUpdate.packs - 1)
+      }
       
       return newCards
     } catch (error) {
@@ -149,7 +191,7 @@ export const useUserStore = defineStore('user', () => {
 
   const reset = () => {
     customerId.value = ''
-    envelopes.value = 0
+    packsToOpen.value = []
     ownedCards.value = []
     error.value = null
     isLoading.value = false
@@ -160,13 +202,17 @@ export const useUserStore = defineStore('user', () => {
     customerId,
     name,
     avatar,
-    envelopes,
+    packsToOpen,
     ownedCards,
+    stickersToView,
     isLoading,
     error,
     // Getters
     isLoggedIn,
     totalOwnedCards,
+    totalPacks,
+    defaultPacks,
+    goldenPacks,
     ownsCard,
     getOwnedCard,
     getCardQuantity,

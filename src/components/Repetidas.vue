@@ -5,12 +5,12 @@
     @click="close">
     
     <div 
-      class="bg-white rounded-lg p-6 max-w-4xl max-h-[80vh] overflow-y-auto shadow-xl"
+      class="bg-white rounded-lg p-6 w-full max-w-6xl max-h-[85vh] flex flex-col shadow-xl"
       @click.stop>
       
       <!-- Header -->
       <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold text-pfblue">Tus tarjetas extra</h2>
+        <h2 class="text-2xl font-bold text-pfblue">Mis stickers</h2>
         <button 
           @click="close"
           class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100">
@@ -18,38 +18,44 @@
         </button>
       </div>
 
-      <!-- Cards Grid -->
-      <div v-if="extraCards.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        <div 
-          v-for="card in extraCards" 
-          :key="card.id"
-          class="relative group">
-          
-          <CardRenderer
-           :iscard="true" 
-            :identifier="card.identifier ? Number(card.identifier) : 0"  
-            :base="card.resource" 
-            ></CardRenderer>
+      <!-- Horizontal Carousel -->
+      <div v-if="extraCards.length > 0" class="flex-1 overflow-hidden">
+        <div class="h-full overflow-x-auto overflow-y-hidden pb-4">
+          <div class="flex gap-6 h-full items-center px-4 min-w-max">
+            <div 
+              v-for="card in extraCards" 
+              :key="card.id"
+              class="shrink-0 flex flex-col items-center">
+              
+              <div class="relative group mb-3">
+                <CardRenderer
+                  :iscard="true" 
+                  :identifier="card.identifier ? Number(card.identifier) : 0"  
+                  :base="card.resource" 
+                />
 
-          <!-- Already in Album Indicator -->
-          <div v-if="hasCardInAlbum(card.identifier)" class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full font-bold">
-            Repetida
+                <!-- Already in Album Indicator -->
+                <div v-if="hasCardInAlbum(card.identifier)" class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+                  Repetida
+                </div>
+              </div>
+
+              <!-- Add to Album Button -->
+              <button 
+                @click="addToAlbum(card)"
+                :disabled="userStore.isLoading"
+                class="w-full max-w-[200px] btn text-sm"
+                :class="[
+                  { 'opacity-50 cursor-not-allowed': userStore.isLoading },
+                  hasCardInAlbum(card.identifier) ? 'btn-secondary' : 'btn-primary'
+                ]">
+                {{ 
+                  userStore.isLoading ? 'Procesando...' : 
+                  hasCardInAlbum(card.identifier) ? 'Reemplazar' : 'Colocar en álbum' 
+                }}
+              </button>
+            </div>
           </div>
-
-          <!-- Add to Album Button -->
-          <button 
-            @click="addToAlbum(card)"
-            :disabled="userStore.isLoading"
-            class="mt-2 w-full btn text-sm"
-            :class="[
-              { 'opacity-50 cursor-not-allowed': userStore.isLoading },
-              hasCardInAlbum(card.identifier) ? 'btn-secondary' : 'btn-primary'
-            ]">
-            {{ 
-              userStore.isLoading ? 'Procesando...' : 
-              hasCardInAlbum(card.identifier) ? 'Reemplazar' : 'Colocar en álbum' 
-            }}
-          </button>
         </div>
       </div>
 
@@ -58,7 +64,7 @@
         <div class="text-gray-400 mb-4">
           <Icon icon="mdi:cards-outline" class="w-16 h-16 mx-auto" />
         </div>
-        <p class="text-gray-600">No tienes tarjetas repetidas disponibles</p>
+        <p class="text-gray-600">No tienes stickers fuera del álbum</p>
       </div>
     </div>
   </div>

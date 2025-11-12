@@ -5,7 +5,7 @@
       @click="showModal = true"
       class="btn  w-full">
       <Icon icon="mdi:cards-outline" class="w-4 h-4 mr-2" />
-      Mis tarjetas extra ({{ extraCardsCount }})
+      Mis stickers ({{ extraCardsCount }})
     </button>
 
     <!-- Modal -->
@@ -15,13 +15,13 @@
       @click="close">
       
       <div 
-        class="bg-white rounded-lg p-6 max-w-4xl max-h-[80vh] overflow-y-auto shadow-xl"
+        class="bg-white rounded-lg p-6 w-full max-w-6xl max-h-[85vh] flex flex-col shadow-xl"
         @click.stop>
         
         <!-- Header -->
         <div class="flex justify-between items-center mb-6">
           <div>
-            <h2 class="text-2xl font-bold text-pfblue">Tus tarjetas extra</h2>
+            <h2 class="text-2xl font-bold text-pfblue">Mis stickers</h2>
             <p v-if="hasNewCards" class="text-sm text-orange-600 font-medium flex items-center">
               <Icon icon="mdi:star" class="w-4 h-4 mr-1" />
               ¡Tienes cartas nuevas del sobre!
@@ -34,43 +34,35 @@
           </button>
         </div>
 
-        <!-- Cards Grid -->
-        <div v-if="extraCards.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          <div 
-            v-for="card in extraCards" 
-            :key="card.id"
-            class="relative group">
-            
-            <CardRenderer
-             :iscard="true" 
-              :identifier="card.identifier ? Number(card.identifier) : 0"  
-              :base="card.resource" 
-              ></CardRenderer>
+        <!-- Horizontal Carousel -->
+        <div v-if="extraCards.length > 0" class="flex-1 overflow-hidden">
+          <div class="h-full overflow-x-auto overflow-y-hidden pb-4">
+            <div class="flex gap-6 h-full items-center px-4 min-w-max">
+              <div 
+                v-for="card in extraCards" 
+                :key="card.id"
+                class="shrink-0 flex flex-col items-center cursor-pointer hover:scale-105 transition-transform"
+                @click="openCardDetail(card)">
+                
+                <div class="relative group mb-3 min-w-[180px]">
+                  <CardRenderer
+                    :iscard="true" 
+                    :identifier="card.identifier ? Number(card.identifier) : 0"  
+                    :base="card.resource" 
+                  />
 
-            <!-- New Card Star Indicator -->
-            <div v-if="isNewlyOpened(card.id)" class="absolute top-2 left-2 bg-orange-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse">
-              <Icon icon="mdi:star" class="w-3 h-3" />
+                  <!-- New Card Star Indicator -->
+                  <div v-if="isNewlyOpened(card.id)" class="absolute top-2 left-2 bg-orange-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse">
+                    <Icon icon="mdi:star" class="w-3 h-3" />
+                  </div>
+
+                  <!-- Already in Album Indicator -->
+                  <div v-if="hasCardInAlbum(card.identifier)" class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+                    Repetida
+                  </div>
+                </div>
+              </div>
             </div>
-
-            <!-- Already in Album Indicator -->
-            <div v-if="hasCardInAlbum(card.identifier)" class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full font-bold">
-              Repetida
-            </div>
-
-            <!-- Add to Album Button -->
-            <button 
-              @click="addToAlbum(card)"
-              :disabled="userStore.isLoading"
-              class="mt-2 w-full btn text-sm"
-              :class="[
-                { 'opacity-50 cursor-not-allowed': userStore.isLoading },
-                hasCardInAlbum(card.identifier) ? 'btn-secondary' : 'btn-primary'
-              ]">
-              {{ 
-                userStore.isLoading ? 'Procesando...' : 
-                hasCardInAlbum(card.identifier) ? 'Reemplazar' : 'Colocar en álbum' 
-              }}
-            </button>
           </div>
         </div>
 
@@ -79,7 +71,61 @@
           <div class="text-gray-400 mb-4">
             <Icon icon="mdi:cards-outline" class="w-16 h-16 mx-auto" />
           </div>
-          <p class="text-gray-600">No tienes tarjetas repetidas disponibles</p>
+          <p class="text-gray-600">No tienes stickers fuera del álbum</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card Detail Modal -->
+    <div 
+      v-if="selectedCard" 
+      class="fixed inset-0 z-60 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+      @click="closeCardDetail">
+      
+      <div 
+        class="bg-white rounded-lg p-6 max-w-md shadow-2xl"
+        @click.stop>
+        
+        <!-- Card Display -->
+        <div class="mb-4">
+          <CardRenderer
+            :iscard="true" 
+            :identifier="selectedCard.identifier ? Number(selectedCard.identifier) : 0"  
+            :base="selectedCard.resource" 
+          />
+        </div>
+
+        <!-- Card Info -->
+        <div class="text-center mb-4">
+          <p class="text-lg font-bold text-pfblue">
+            Sticker #{{ selectedCard.identifier }}
+          </p>
+          <p v-if="hasCardInAlbum(selectedCard.identifier)" class="text-sm text-yellow-600 font-medium mt-1">
+            Ya tienes esta carta en el álbum
+          </p>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-3">
+          <button 
+            @click="addToAlbum(selectedCard)"
+            :disabled="userStore.isLoading"
+            class="flex-1 btn"
+            :class="[
+              { 'opacity-50 cursor-not-allowed': userStore.isLoading },
+              hasCardInAlbum(selectedCard.identifier) ? 'btn-secondary' : 'btn-primary'
+            ]">
+            <Icon icon="mdi:star-plus" class="w-4 h-4 mr-2" />
+            {{ 
+              userStore.isLoading ? 'Procesando...' : 
+              hasCardInAlbum(selectedCard.identifier) ? 'Reemplazar' : 'Colocar en álbum' 
+            }}
+          </button>
+          <button 
+            @click="closeCardDetail"
+            class="btn btn-secondary">
+            Cerrar
+          </button>
         </div>
       </div>
     </div>
@@ -95,6 +141,7 @@ import { useNewlyOpenedCards } from '../composables/useNewlyOpenedCards'
 
 const userStore = useUserStore()
 const showModal = ref(false)
+const selectedCard = ref<any>(null)
 const { isNewlyOpened, clearNewlyOpenedCards } = useNewlyOpenedCards()
 
 // Get all cards where inAlbum is false, ordered by identifier ascending
@@ -126,6 +173,16 @@ const hasCardInAlbum = (identifier: string | number | null) => {
   )
 }
 
+// Open card detail modal
+function openCardDetail(card: any) {
+  selectedCard.value = card
+}
+
+// Close card detail modal
+function closeCardDetail() {
+  selectedCard.value = null
+}
+
 async function addToAlbum(card: any) {
   try {
     const updates = []
@@ -145,6 +202,9 @@ async function addToAlbum(card: any) {
     
     // Execute both updates in a single API call
     await userStore.updateInAlbum(updates)
+    
+    // Close detail modal after adding
+    closeCardDetail()
   } catch (error) {
     console.error('Failed to add card to album:', error)
   }

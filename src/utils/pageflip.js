@@ -13,11 +13,15 @@ export async function startFlip(thebookRef, onFlip) {
         minWidth: 280,
         maxShadowOpacity: 0.3, // Half shadow intensity
         showCover: true,
-        //disableFlipByClick: true,
         useMouseEvents: false,
+        disableFlipByClick: true,
+        showPageCorners: false,
         mobileScrollSupport: false,
         flippingTime: 400
     });
+
+
+    
 
     pageFlip.loadFromHTML(document.querySelectorAll('.page'));
 

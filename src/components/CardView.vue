@@ -3,11 +3,14 @@
     ref="cardWrapper"
     class=" transform-gpu w-full"
     :class="{
-      'cursor-pointer hover:-translate-y-1 hover:scale-105 transition-all ': !open,
-      'absolute z-50 flex flex-col justify-center items-center w-auto!': open,
+      'cursor-pointer hover:-translate-y-1 hover:scale-105 transition-all shrink-0 grow-0 w-full ': !open,
+      'absolute z-50 flex flex-col justify-center items-center w-auto! ': open,
     }"
     :style="open ? modalStyle : {}"
     @click="openCard">
+
+    <div :class="{'relative':true, 'w-full max-w-sm': open}">
+      
     
     <CardRenderer 
       :iscard="true" 
@@ -18,14 +21,16 @@
       :base="ownedCard.resource"
       :disposition="cardDisposition" 
     />
-    
     <!-- Floating Close Button -->
     <button 
       v-if="isInFinalPosition" 
       @click.stop="closeCard"
-      class="absolute cursor-pointer top-4 right-4 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-colors z-60">
+      class="absolute cursor-pointer -top-4 -right-4 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-colors z-60">
       <Icon icon="mdi:close" class="w-6 h-6" />
     </button>
+    </div>
+
+    
     
     <!-- Bottom Action Buttons -->
     <div v-if="isInFinalPosition" class="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-3">
@@ -48,7 +53,7 @@
       </button>
     </div>
 
-    <div :style="isInFinalPosition?'opacity:1;':'opacity:0;'" class="absolute inset-0 -z-10 bg-linear-to-br from-black/20 to-white/10 backdrop-blur-md transition-all duration-1000"></div>
+    <div :style="isInFinalPosition?'opacity:1;':'opacity:0;'" class="pointer-events-none absolute inset-0 -z-10 bg-linear-to-br from-black/20 to-white/10 backdrop-blur-md transition-all duration-1000"></div>
 
   </div>
 

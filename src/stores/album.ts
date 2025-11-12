@@ -20,6 +20,9 @@ export const useAlbumStore = defineStore('album', () => {
   const totalPages = computed(() => pageDistribution.value.totalPages)
   const categoryDistribution = computed(() => pageDistribution.value.categoriesDistribution)
   const allCardsWithPages = computed(() => pageDistribution.value.allCards)
+  
+  // Physical page structure: Front Cover (0) + Index (1) + Content Pages (2..n) + Back Cover (n+1)
+  const totalPhysicalPages = computed(() => totalPages.value + 3) // +2 front covers, +1 back cover
 
   // User-aware computed properties (requires user store)
   const getCardWithOwnership = (userStore: any) => computed(() => (cardId: number) => {
@@ -43,33 +46,24 @@ export const useAlbumStore = defineStore('album', () => {
 
   // Getters
   const isFirstPage = computed(() => currentPage.value === 0)
-  const isLastPage = computed(() => currentPage.value === totalPages.value - 1)
+  const isLastPage = computed(() => currentPage.value === totalPhysicalPages.value - 1)
   const canGoNext = computed(() => !isLastPage.value)
   const canGoPrevious = computed(() => !isFirstPage.value)
-  const pageProgress = computed(() => ((currentPage.value + 1) / totalPages.value) * 100)
+  const pageProgress = computed(() => ((currentPage.value + 1) / totalPhysicalPages.value) * 100)
 
-  // State for orientation-aware navigation
+  // State for orientation tracking
   const isLandscape = ref(false)
-  const stepSize = computed(() => isLandscape.value ? 2 : 1)
 
-  // Actions
+  // Actions - Simplified to always step 1 page at a time
   const nextPage = () => {
-    const step = stepSize.value
-    if (currentPage.value + step < totalPages.value) {
-      currentPage.value += step
-    } else if (currentPage.value < totalPages.value - 1) {
-      // Move to last page if we can't take a full step
-      currentPage.value = totalPages.value - 1
+    if (currentPage.value < totalPhysicalPages.value - 1) {
+      currentPage.value += 1
     }
   }
 
   const previousPage = () => {
-    const step = stepSize.value
-    if (currentPage.value - step >= 0) {
-      currentPage.value -= step
-    } else if (currentPage.value > 0) {
-      // Move to first page if we can't take a full step back
-      currentPage.value = 0
+    if (currentPage.value > 0) {
+      currentPage.value -= 1
     }
   }
 
@@ -79,7 +73,7 @@ export const useAlbumStore = defineStore('album', () => {
   }
 
   const goToPage = (pageIndex: number) => {
-    if (pageIndex >= 0 && pageIndex < totalPages.value) {
+    if (pageIndex >= 0 && pageIndex < totalPhysicalPages.value) {
       currentPage.value = pageIndex
     }
   }
@@ -89,7 +83,7 @@ export const useAlbumStore = defineStore('album', () => {
   }
 
   const goToLastPage = () => {
-    currentPage.value = totalPages.value - 1
+    currentPage.value = totalPhysicalPages.value - 1
   }
 
   // Page distribution helper methods
@@ -114,6 +108,7 @@ export const useAlbumStore = defineStore('album', () => {
     // State
     currentPage,
     totalPages,
+    totalPhysicalPages,
     isLandscape,
     listOfCards,
     listOfCategories,
@@ -127,7 +122,6 @@ export const useAlbumStore = defineStore('album', () => {
     canGoNext,
     canGoPrevious,
     pageProgress,
-    stepSize,
     // Actions
     nextPage,
     previousPage,

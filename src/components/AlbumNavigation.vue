@@ -45,7 +45,7 @@ watch(() => albumStore.currentPage, (newPage) => {
 
 <template>
 
-  <div class="flex items-center gap-2 md:fixed bottom-1 left-1 right-1 bg-white p-2 rounded-lg shadow-md bg-pattern w-full md:w-auto">
+  <div class="flex items-center gap-2 md:fixed bottom-2 left-1 right-1 bg-white p-2 rounded-lg shadow-md bg-pattern w-full md:w-auto max-w-6xl mx-auto">
 
 
 
@@ -59,7 +59,7 @@ watch(() => albumStore.currentPage, (newPage) => {
     
     <div class="flex-1 flex flex-col items-center gap-1">
       <span class="badge -mt-8 mb-2">
-        {{ albumStore.currentPage }} / {{ albumStore.totalPages }}
+        {{ albumStore.currentPage + 1 }} / {{ albumStore.totalPhysicalPages }}
       </span>
 
       <div class="w-full">
@@ -68,7 +68,7 @@ watch(() => albumStore.currentPage, (newPage) => {
           ref="sliderRef"
           type="range" 
           :min="0" 
-          :max="albumStore.totalPages - 1"
+          :max="albumStore.totalPhysicalPages - 1"
           :value="albumStore.currentPage"
           @input="onSliderChange"
           class="input w-full"
