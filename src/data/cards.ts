@@ -6,7 +6,7 @@ export interface Card {
   disposition?: string;
   metal?: number | null;
   anim?: number | null;
-  has3d?: boolean | null;
+  has3d?: boolean | string | null;
 }
 
 export const cardsDatabase: Card[] = 
