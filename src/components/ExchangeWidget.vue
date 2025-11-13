@@ -28,6 +28,47 @@
           </button>
         </div>
 
+        <!-- My Exchanges Section -->
+        <div v-if="myExchanges.length > 0" class="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <h3 class="text-lg font-bold text-pfblue mb-3 flex items-center gap-2">
+            <Icon icon="mdi:clipboard-list" class="w-5 h-5" />
+            Mis Intercambios Activos ({{ myExchanges.length }})
+          </h3>
+          
+          <div class="space-y-3">
+            <div 
+              v-for="exchange in myExchanges"
+              :key="exchange.exchangeId"
+              class="bg-white rounded-lg p-3 border border-blue-200 flex items-center justify-between">
+              
+              <div class="flex-1">
+                <div class="flex gap-4 text-sm">
+                  <div>
+                    <span class="font-semibold text-gray-700">Ofreces:</span>
+                    <span class="ml-1 text-blue-600">{{ exchange.stickersOffered }}</span>
+                  </div>
+                  <div>
+                    <span class="font-semibold text-gray-700">Buscas:</span>
+                    <span class="ml-1 text-green-600">{{ exchange.stickersWanted }}</span>
+                  </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">{{ formatDate(exchange.exchangeAddedDate) }}</p>
+              </div>
+
+              <button 
+                @click="cancelExchange(exchange.exchangeId)"
+                :disabled="isCancelling === exchange.exchangeId"
+                class="btn btn-sm bg-red-500 hover:bg-red-600 text-white disabled:opacity-50 disabled:cursor-not-allowed shrink-0">
+                <Icon 
+                  :icon="isCancelling === exchange.exchangeId ? 'mdi:loading' : 'mdi:close-circle'" 
+                  :class="{ 'animate-spin': isCancelling === exchange.exchangeId }"
+                  class="w-4 h-4 mr-1" />
+                {{ isCancelling === exchange.exchangeId ? 'Cancelando...' : 'Cancelar' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Offer Section -->
         <div class="mb-8">
           <h3 class="text-xl font-bold text-pfblue mb-3 flex items-center gap-2">
@@ -233,7 +274,7 @@
 import { ref, computed } from 'vue'
 import { useUserStore } from '../stores/user'
 import { Icon } from '@iconify/vue'
-import { apiService, type ExchangeMatch } from '../services/api'
+import { apiService, type ExchangeMatch, type CurrentExchange } from '../services/api'
 import CardRenderer from './CardRenderer.vue'
 import { cardsDatabase, type Card } from '../data/cards'
 import type { UserCard } from '../stores/user'
@@ -250,6 +291,10 @@ const searchQuery = ref('')
 const selectedOffer = ref<number[]>([])
 const selectedWanted = ref<number[]>([])
 const exchangeMatches = ref<ExchangeMatch[]>([])
+
+// My exchanges state
+const myExchanges = ref<CurrentExchange[]>([])
+const isCancelling = ref<number | null>(null)
 
 // Available stickers for offer (not in album)
 const availableStickers = computed(() => {
@@ -277,6 +322,56 @@ function openExchange() {
   selectedOffer.value = []
   selectedWanted.value = []
   error.value = null
+  loadMyExchanges()
+}
+
+async function loadMyExchanges() {
+  try {
+    const response = await apiService.getCurrentExchanges(userStore.customerId)
+    if (response.success && response.data) {
+      // Filter to only show exchanges created by the current user
+      myExchanges.value = response.data.filter(
+        ex => ex.customerIdOffers === Number(userStore.customerId)
+      )
+    }
+  } catch (err) {
+    console.error('Error loading my exchanges:', err)
+  }
+}
+
+function formatDate(dateStr: string): string {
+  try {
+    const date = new Date(dateStr)
+    return date.toLocaleDateString('es-ES', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    })
+  } catch {
+    return dateStr
+  }
+}
+
+async function cancelExchange(exchangeId: number) {
+  if (!userStore.customerId) return
+  
+  isCancelling.value = exchangeId
+  
+  try {
+    const response = await apiService.cancelExchange(userStore.customerId, exchangeId)
+    
+    if (response.success) {
+      // Remove from local list
+      myExchanges.value = myExchanges.value.filter(ex => ex.exchangeId !== exchangeId)
+    } else {
+      error.value = response.data?.message || 'Error al cancelar el intercambio'
+    }
+  } catch (err) {
+    console.error('Error cancelling exchange:', err)
+    error.value = 'Error al cancelar el intercambio'
+  } finally {
+    isCancelling.value = null
+  }
 }
 
 function close() {
@@ -353,9 +448,13 @@ async function startExchange() {
         // Success - found matches!
         exchangeMatches.value = response.data
         showSuccessModal.value = true
+        // Refresh my exchanges list
+        await loadMyExchanges()
       } else {
         // Error or no matches (resultId === -1)
         showNoMatchesModal.value = true
+        // Still refresh in case the exchange was created
+        await loadMyExchanges()
       }
     } else {
       // No data returned

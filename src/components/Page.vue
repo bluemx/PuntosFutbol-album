@@ -1,10 +1,14 @@
 <template>
-    <div class="page relative innerpage card p-0 overflow-hidden " >
-        <div class="page-content flex flex-col h-full " :style="bgStyle(getPageImageUrl())">
+    <div class="page relative innerpage card p-0 overflow-hidden bg-pfblue" >
+        <div class="page-content flex flex-col h-full relative ">
+            <div class="absolute inset-0  z-0 bg-linear-to-b from-blue-900 to-black/0" ></div>
+            <div class="absolute inset-0  opacity-75 mix-blend-multiply" :style="bgStyle(getPageImageUrl())"></div>
+
+
             
             <h2 
                 v-if="categoryName" 
-                class="text-3xl font-black text-white py-3 px-6 mx-auto mt-1  rounded-lg uppercase tracking-wider"
+                class="text-3xl font-black text-white py-3 px-6 mx-auto mt-1 z-10 rounded-lg uppercase tracking-wider"
                 style="text-shadow: 3px 3px 0px #1e40af;">
                 {{ categoryName }}
             </h2>
@@ -54,7 +58,9 @@
                     {{ (thisPage ?? 0) + 2 }}
                 </div>
             </div>
+            
         </div>
+
     </div>
 </template>
 

@@ -184,10 +184,15 @@ async function checkForExchanges() {
       return
     }
 
+    // Filter out exchanges created by the current user
+    const otherUsersExchanges = response.data.filter(
+      ex => ex.customerIdOffers !== Number(userStore.customerId)
+    )
+
     // Find matches where user has the wanted stickers in their duplicates
     const matchedExchanges: ExchangeMatchWithData[] = []
     
-    for (const exchange of response.data) {
+    for (const exchange of otherUsersExchanges) {
       const wantedIdentifiers = parseNumbers(exchange.stickersWanted)
       const matchedCards: number[] = []
       

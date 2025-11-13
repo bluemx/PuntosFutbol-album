@@ -124,6 +124,12 @@ interface CompleteExchangeData {
 
 type CompleteExchangeResponse = ApiEnvelope<CompleteExchangeData>
 
+interface CancelExchangeData {
+  message: string
+}
+
+type CancelExchangeResponse = ApiEnvelope<CancelExchangeData>
+
 export const apiService = {
   async getCustomerStickers(customerId: string): Promise<CustomerStickersResponse> {
     const response = await fetch(`${API_BASE_URL}/CustomerStickers`, {
@@ -266,6 +272,25 @@ export const apiService = {
       },
       body: JSON.stringify({
         CustomerIdCompleted: customerIdCompleted,
+        ExchangeId: exchangeId
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status} ${response.statusText}`)
+    }
+    return await response.json()
+  },
+
+  async cancelExchange(customerId: string, exchangeId: number): Promise<CancelExchangeResponse> {
+    const response = await fetch(`${API_BASE_URL}/CancelExchange`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': API_KEY
+      },
+      body: JSON.stringify({
+        Customerid: customerId,
         ExchangeId: exchangeId
       })
     })
