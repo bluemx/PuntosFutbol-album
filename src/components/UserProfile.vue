@@ -17,10 +17,10 @@
 
 <script setup lang="ts">
 import { useUserStore } from '../stores/user'
-import { useAlbumStore } from '../stores/album'
+
 import UserCollection from './UserCollection.vue';
 
 const userStore = useUserStore();
-const albumStore = useAlbumStore();
+
 
 </script>
