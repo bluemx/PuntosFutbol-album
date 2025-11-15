@@ -21,6 +21,16 @@
       :base="ownedCard.resource"
       :disposition="cardDisposition" 
     />
+
+    <!-- Card Description -->
+    <!--
+      <div 
+      v-if="isInFinalPosition && cardDescription" 
+      class="mt-1 text-center text-white text-lg font-semibold px-2 py-1 bg-black/50 rounded-lg backdrop-blur-sm">
+      {{ cardDescription }}
+    </div>
+    -->
+
     <!-- Floating Close Button -->
     <button 
       v-if="isInFinalPosition" 
@@ -33,7 +43,12 @@
     
     
     <!-- Bottom Action Buttons -->
-    <div v-if="isInFinalPosition" class="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-3">
+    <div v-if="isInFinalPosition" class="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-1 flex-col w-2/3">
+       <!-- Card Description -->
+    <div  
+      class="mt-1 text-center text-white text-sm px-2 py-1 bg-black/20 rounded-lg backdrop-blur-sm">
+      {{ cardDescription }}
+    </div>
       <!-- 3D Button -->
       <button 
         v-if="cardHas3D"
@@ -49,7 +64,7 @@
         :disabled="userStore.isLoading"
         class="btn btn-secondary"
         :class="{ 'opacity-50 cursor-not-allowed': userStore.isLoading }">
-        {{ userStore.isLoading ? 'Quitando...' : 'Quitar del álbum' }}
+        {{ userStore.isLoading ? 'Quitando...' : 'Despegar del álbum' }}
       </button>
     </div>
 
@@ -102,6 +117,11 @@ const cardDisposition = computed(() => {
 const cardHas3D = computed(() => {
   const cardData = cardsDatabase.find(card => card.identifier === props.cardId)
   return cardData?.has3d || false
+})
+
+const cardDescription = computed(() => {
+  const cardData = cardsDatabase.find(card => card.identifier === props.cardId)
+  return cardData?.desc || ''
 })
 
 function calculateModalPosition() {

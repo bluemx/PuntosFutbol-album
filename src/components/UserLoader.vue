@@ -4,7 +4,7 @@
     <div v-if="userStore.isLoading" class="text-center">
       <div class="animate-spin rounded-full h-16 w-16 border-4 border-white border-t-transparent mx-auto mb-4"></div>
       <h2 class="text-2xl font-bold mb-2">Cargando tu álbum...</h2>
-      <p class="text-blue-200">Obteniendo tu colección de stickers...</p>
+      <p class="text-blue-200">Obteniendo tu colección de estampas...</p>
     </div>
 
     <!-- Error State -->
@@ -26,7 +26,7 @@
       <img src="/logow-anim.svg" class="w-40 mx-auto" />
       
       <div class="bg-white/10 rounded-lg p-6 mb-6 backdrop-blur-sm mt-10">
-        <div class="text-sm text-blue-200">Cuentas con {{ userStore.totalOwnedCards }} stickers</div>
+        <div class="text-sm text-blue-200">Cuentas con {{ userStore.totalOwnedCards }} estampas</div>
       </div>
 
       <button

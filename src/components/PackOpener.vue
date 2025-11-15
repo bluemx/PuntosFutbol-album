@@ -6,9 +6,16 @@
       :disabled="userStore.totalPacks <= 0"
       class="btn btn-primary w-full"
       :class="{ 'opacity-50 cursor-not-allowed': userStore.totalPacks <= 0 }">
-      <Icon icon="mdi:package-variant" class="w-4 h-4 mr-2" />
-      Abrir Sobres ({{ userStore.totalPacks }})
-
+      <Icon icon="mdi:mirror-rectangle" class="w-4 h-4 mr-2" />
+      Abrir Sobres
+      <div class="flex gap-0.5">
+      <div v-if="userStore.defaultPacks > 0" class="badge bg-gray-400 text-white ml-0.5">
+        {{ userStore.defaultPacks }}
+      </div>
+      <div v-if="userStore.goldenPacks > 0" class="badge bg-yellow-500 text-white ">
+        {{ userStore.goldenPacks }}
+      </div>
+      </div>
     </button>
 
     <!-- Modal -->
@@ -23,7 +30,19 @@
         
         <!-- Header -->
         <div class="flex justify-between items-center mb-6">
-          <h2 class="text-2xl font-bold text-pfblue">Abrir Sobres</h2>
+          <div>
+            <h2 class="text-2xl font-bold text-pfblue">Abrir Sobres</h2>
+            <div class="flex gap-3 mt-2">
+              <p v-if="userStore.defaultPacks > 0" class="text-sm text-gray-600 flex items-center gap-1">
+                <span class="font-semibold">Normales:</span>
+                <span class="badge bg-gray-400 text-white">{{ userStore.defaultPacks }}</span>
+              </p>
+              <p v-if="userStore.goldenPacks > 0" class="text-sm text-gray-600 flex items-center gap-1">
+                <span class="font-semibold">Dorados:</span>
+                <span class="badge bg-yellow-500 text-white">{{ userStore.goldenPacks }}</span>
+              </p>
+            </div>
+          </div>
           <button 
             @click="close"
             class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100">
@@ -92,14 +111,14 @@
         <div v-if="!openedCards.length && userStore.totalPacks > 0" class="py-8">
           <!-- Carousel Container -->
           <div class="overflow-x-auto pb-4 px-4">
-            <div class="flex gap-6 justify-start min-w-max">
+            <div class="flex gap-6 justify-start min-w-max py-10">
               <!-- Normal Packs -->
               <div
-                v-for="(pack, index) in normalPacksArray"
+                v-for="(_pack, index) in normalPacksArray"
                 :key="`normal-${index}`"
                 class="pack-item cursor-pointer transition-all duration-300"
                 :class="{ 'selected': selectedPack?.type === 1 && selectedPack?.index === index }"
-                :style="{ transform: `rotate(${pack.rotation}deg)` }"
+                
                 @click="selectPack(1, index)"
               >
                 <img 
@@ -111,11 +130,11 @@
               
               <!-- Golden Packs -->
               <div
-                v-for="(pack, index) in goldenPacksArray"
+                v-for="(_pack, index) in goldenPacksArray"
                 :key="`golden-${index}`"
                 class="pack-item cursor-pointer transition-all duration-300"
                 :class="{ 'selected': selectedPack?.type === 2 && selectedPack?.index === index }"
-                :style="{ transform: `rotate(${pack.rotation}deg)` }"
+
                 @click="selectPack(2, index)"
               >
                 <img 
@@ -136,7 +155,8 @@
               :class="selectedPack.type === 2 ? 'bg-linear-to-r from-yellow-400 to-yellow-600 text-white' : 'btn-primary'"
             >
               <Icon v-if="isOpening" icon="mdi:loading" class="w-5 h-5 mr-2 animate-spin" />
-              <Icon v-else icon="mdi:package-variant-closed" class="w-5 h-5 mr-2" />
+              <Icon v-else icon="mdi:mirror-rectangle" class="w-5 h-5 mr-2" />
+              
               {{ isOpening ? 'Abriendo...' : 'Abrir Sobre' }}
             </button>
           </div>
@@ -155,7 +175,8 @@
             <div 
               v-for="card in openedCards" 
               :key="card.id"
-              class="relative group animate-fadeIn">
+              class="relative group animate-fadeIn cursor-pointer hover:scale-105 transition-transform"
+              @click="openCardDetail(card)">
               
               <CardRenderer
                :iscard="true" 
@@ -167,21 +188,36 @@
               <div class="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse">
                 ¡Nueva!
               </div>
+
+              <!-- Card Info -->
+              <div class="mt-2 text-center text-xs text-gray-600">
+                <div class="font-semibold truncate">{{ getCardDescription(card) }}</div>
+                <div class="text-gray-400">{{ getCardType(card) }}</div>
+              </div>
             </div>
           </div>
 
           <div class="flex flex-wrap gap-3 justify-center">
             <button 
+              @click="addAllToAlbum"
+              :disabled="isAddingToAlbum"
+              class="btn btn-success"
+              :class="{ 'opacity-50 cursor-not-allowed': isAddingToAlbum }">
+              <Icon v-if="isAddingToAlbum" icon="mdi:loading" class="w-4 h-4 mr-2 animate-spin" />
+              <Icon v-else icon="mdi:star-plus" class="w-4 h-4 mr-2" />
+              {{ isAddingToAlbum ? 'Agregando...' : 'Pegar en Álbum' }}
+            </button>
+            <button 
               @click="goToRepetidas"
-              class="btn btn-success">
-              <Icon icon="mdi:star-plus" class="w-4 h-4 mr-2" />
-              Colocar en Álbum
+              class="btn btn-primary">
+              <Icon icon="mdi:cards-outline" class="w-4 h-4 mr-2" />
+              Ver todos mis stickers
             </button>
             <button 
               v-if="userStore.totalPacks > 0"
               @click="resetAndOpenAnother"
               class="btn btn-primary">
-              <Icon icon="mdi:package-variant-closed" class="w-4 h-4 mr-2" />
+              <Icon icon="mdi:mirror-rectangle" class="w-4 h-4 mr-2" />
               Abrir Otro ({{ userStore.totalPacks }})
             </button>
             <button 
@@ -195,9 +231,43 @@
         <!-- No Envelopes State -->
         <div v-if="userStore.totalPacks <= 0" class="text-center py-12">
           <div class="text-gray-400 mb-4">
-            <Icon icon="mdi:package-variant-remove" class="w-16 h-16 mx-auto" />
+            <Icon icon="mdi:mirror-rectangle-remove" class="w-16 h-16 mx-auto" />
           </div>
           <p class="text-gray-600">No tienes sobres disponibles</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card Detail Modal -->
+    <div 
+      v-if="selectedCard" 
+      class="fixed inset-0 z-60 flex items-center justify-center bg-black/50 backdrop-blur-md p-4"
+      @click="closeCardDetail">
+      
+      <div 
+        class="bg-white rounded-lg p-8 max-w-2xl w-full shadow-xl flex flex-col items-center relative"
+        @click.stop>
+        
+        <!-- Close Button -->
+        <button 
+          @click="closeCardDetail"
+          class="absolute top-4 right-4 w-10 h-10 flex items-center justify-center text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100 z-10">
+          <Icon icon="mdi:close" class="w-6 h-6" />
+        </button>
+
+        <!-- Card Display -->
+        <div class="w-full max-w-sm mb-6">
+          <CardRenderer
+            :iscard="true" 
+            :identifier="getCardIdentifier(selectedCard.resource)"  
+            :base="selectedCard.resource"
+          />
+        </div>
+
+        <!-- Card Info -->
+        <div class="text-center">
+          <h3 class="text-2xl font-bold text-pfblue mb-2">{{ getCardDescription(selectedCard) }}</h3>
+          <p class="text-lg text-gray-600">{{ getCardType(selectedCard) }}</p>
         </div>
       </div>
     </div>
@@ -211,6 +281,7 @@ import { Icon } from '@iconify/vue'
 import CardRenderer from './CardRenderer.vue'
 import type { UserCard } from '../stores/user'
 import { useNewlyOpenedCards } from '../composables/useNewlyOpenedCards'
+import { cardsDatabase } from '../data/cards'
 import normalPackImg from '../assets/pack/normal.webp'
 import goldenPackImg from '../assets/pack/golden.webp'
 import normalBurstSvg from '../assets/pack/normal-burst.svg'
@@ -223,7 +294,9 @@ const emit = defineEmits<{
 const userStore = useUserStore()
 const showModal = ref(false)
 const isOpening = ref(false)
+const isAddingToAlbum = ref(false)
 const openedCards = ref<UserCard[]>([])
+const selectedCard = ref<UserCard | null>(null)
 const selectedPack = ref<{ type: number; index: number } | null>(null)
 const openingPackType = ref<number>(1) // Store the pack type being opened
 const showOpeningAnimation = ref(false)
@@ -272,6 +345,33 @@ function selectPack(type: number, index: number) {
 function getCardIdentifier(resourceUrl: string): number {
   const match = resourceUrl.match(/(\d+)\.webp$/)
   return match && match[1] ? parseInt(match[1]) : 0
+}
+
+// Get card description from database
+function getCardDescription(card: UserCard): string {
+  const identifier = getCardIdentifier(card.resource)
+  const cardData = cardsDatabase.find(c => c.identifier === identifier)
+  return cardData?.desc || `Estampa #${identifier}`
+}
+
+// Get card type (Normal, Metal, or Animada)
+function getCardType(card: UserCard): string {
+  const identifier = getCardIdentifier(card.resource)
+  const cardData = cardsDatabase.find(c => c.identifier === identifier)
+  if (!cardData) return 'Normal'
+  if (cardData.metal) return 'Metal'
+  if (cardData.anim) return 'Animada'
+  return 'Normal'
+}
+
+// Open card detail modal
+function openCardDetail(card: UserCard) {
+  selectedCard.value = card
+}
+
+// Close card detail modal
+function closeCardDetail() {
+  selectedCard.value = null
 }
 
 async function handleOpenPack(packTypeId: number = 1) {
@@ -348,6 +448,46 @@ function resetAndOpenAnother() {
   currentRevealIndex.value = 0
   cardRotations.value = []
   openingPackType.value = 1
+}
+
+async function addAllToAlbum() {
+  if (openedCards.value.length === 0) return
+  
+  try {
+    isAddingToAlbum.value = true
+    
+    const updates = []
+    
+    // For each opened card, check if there's already a card with same identifier in album
+    for (const card of openedCards.value) {
+      if (card.identifier) {
+        // Find if there's already a card in album with same identifier
+        const existingCard = userStore.ownedCards.find(c => 
+          c.inAlbum && c.identifier && Number(c.identifier) === Number(card.identifier)
+        )
+        
+        // If there's an existing card, remove it from album first
+        if (existingCard) {
+          updates.push({ cardId: existingCard.id, inAlbum: false })
+        }
+        
+        // Add the new card to album
+        updates.push({ cardId: card.id, inAlbum: true })
+      }
+    }
+    
+    // Execute all updates in a single API call
+    if (updates.length > 0) {
+      await userStore.updateInAlbum(updates)
+    }
+    
+    // Close the modal after successfully adding all cards
+    close()
+  } catch (error) {
+    console.error('Failed to add cards to album:', error)
+  } finally {
+    isAddingToAlbum.value = false
+  }
 }
 
 function goToRepetidas() {

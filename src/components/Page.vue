@@ -2,7 +2,7 @@
     <div class="page relative innerpage card p-0 overflow-hidden bg-pfblue" >
         <div class="page-content flex flex-col h-full relative ">
             <div class="absolute inset-0  z-0 bg-linear-to-b from-blue-900 to-black/0" ></div>
-            <div class="absolute inset-0  opacity-75 mix-blend-multiply" :style="bgStyle(getPageImageUrl())"></div>
+            <div class="absolute inset-0  opacity-50 mix-blend-multiply" :style="bgStyle(getPageImageUrl())"></div>
 
 
             
@@ -13,7 +13,7 @@
                 {{ categoryName }}
             </h2>
             
-            <div class="flex flex-wrap justify-center items-start content-start gap-3 grow p-2" >
+            <div class="flex flex-wrap justify-evenly gap-2 sm:gap-3 grow px-2 sm:px-6 md:px-10 pb-4 sm:pb-6 md:pb-10" >
                 <template v-for="(item, index) in groupedCards" :key="getItemKey(item, index)">
                     <!-- Mosaic Card Group -->
                     <div 
@@ -42,9 +42,12 @@
                         <!-- Placeholder for unowned cards -->
                         <div 
                             v-else
-                            class="relative card card-slot border w-full h-full bg-white/80 p-2 rounded-[6%] flex flex-col justify-center items-center text-center text-white"
+                            class="relative card card-slot border w-full h-full bg-white/80 p-1 sm:p-2 rounded-[6%] gap-0.5 sm:gap-1 flex flex-col justify-center items-center text-center text-white"
                         >
                             <IdentifierBadge :identifier="item.card.identifier" class="relative" />
+                            <div class="text-[0.65rem] sm:text-xs text-gray-600 px-0.5 leading-tight">
+                                {{ getCardDescription(item.card.identifier).slice(0, 10) }}{{ getCardDescription(item.card.identifier).length > 12 ? '...' : '' }}
+                            </div>
                         </div>
                     </div>
                 </template>
@@ -73,6 +76,7 @@ import CardView from './CardView.vue'
 import IdentifierBadge from './IdentifierBadge.vue'
 import MosaicCardGroup from './MosaicCardGroup.vue'
 import type { CardWithPage } from '../utils/pageDistribution'
+import { cardsDatabase } from '../data/cards'
 
 interface Props {
   thisPage?: number;
@@ -157,19 +161,19 @@ const groupedCards = computed(() => {
 // Helper function to get wrapper class for single cards
 function getSingleCardWrapperClass(disposition?: string) {
   if (disposition === 'Horizontal') {
-    return 'w-[120px] h-[96px]' // 5:4 aspect ratio, horizontal
+    return 'w-[80px] h-[64px] sm:w-[100px] sm:h-[80px] md:w-[120px] md:h-[96px]' // 5:4 aspect ratio, horizontal, responsive
   }
-  return 'w-[96px] h-[120px]' // 4:5 aspect ratio, vertical (default)
+  return 'w-[64px] h-[80px] sm:w-[80px] sm:h-[100px] md:w-[96px] md:h-[120px]' // 4:5 aspect ratio, vertical (default), responsive
 }
 
 // Helper function to get wrapper class for mosaic groups
 function getMosaicWrapperClass(mosaicType: 'Horizontal2' | 'Horizontal4' | 'Vertical4') {
   if (mosaicType === 'Horizontal2') {
-    return 'w-[240px] h-[96px]' // 2 horizontal cards side by side (120px * 2)
+    return 'w-[160px] h-[64px] sm:w-[200px] sm:h-[80px] md:w-[240px] md:h-[96px]' // 2 horizontal cards side by side, responsive
   } else if (mosaicType === 'Horizontal4') {
-    return 'w-[240px] h-[192px]' // 2x2 grid of horizontal cards (120px * 2, 96px * 2)
+    return 'w-[160px] h-[128px] sm:w-[200px] sm:h-[160px] md:w-[240px] md:h-[192px]' // 2x2 grid of horizontal cards, responsive
   } else if (mosaicType === 'Vertical4') {
-    return 'w-[192px] h-[240px]' // 2x2 grid of vertical cards (96px * 2, 120px * 2)
+    return 'w-[128px] h-[160px] sm:w-[160px] sm:h-[200px] md:w-[192px] md:h-[240px]' // 2x2 grid of vertical cards, responsive
   }
   return ''
 }
@@ -197,6 +201,12 @@ function bgStyle(url: string) {
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat'
     } : {};
+}
+
+// Get card description from database
+function getCardDescription(identifier: number) {
+  const cardData = cardsDatabase.find(c => c.identifier === identifier)
+  return cardData?.desc || ''
 }
 
 </script>

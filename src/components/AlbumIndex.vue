@@ -1,11 +1,12 @@
 <template>
-<div class="card p-0.5 md:p-6 overflow-auto max-h-full ring">
-    <h2 class="text-2xl font-bold mb-2 text-center">Secciones</h2>
+<div>
     
-    <div class="flex flex-wrap justify-center  lg:grid-cols-3 gap-4 max-w-xl p-2 mx-auto">
+    <div class="flex flex-wrap justify-center gap-3 max-w-xl mx-auto">
+        <button class="btn-outline grow" @click="navigateToPortada">Portada</button>
         <template v-for="category in categoryDistribution">
             <button class="btn-outline grow" @click="navigateToCategory(category.categoryId)">{{ category.categoryName }}</button>
         </template>
+        <button class="btn-outline grow" @click="navigateToContraportada">Contraportada</button>
     </div>
     
 </div>
@@ -39,6 +40,18 @@ const navigateToCategory = (categoryId: number) => {
     // Emit navigate event to close dropdown
     emit('navigate')
   }
+};
+
+// Navigate to front cover (first page)
+const navigateToPortada = () => {
+  albumStore.goToPage(0);
+  emit('navigate');
+};
+
+// Navigate to back cover (last page)
+const navigateToContraportada = () => {
+  albumStore.goToLastPage();
+  emit('navigate');
 };
 
 

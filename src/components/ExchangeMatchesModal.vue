@@ -16,7 +16,7 @@
           </div>
         </div>
         <h2 class="text-2xl font-bold text-pfblue mb-2">¡Hay Intercambios Disponibles!</h2>
-        <p class="text-gray-600">Encontramos {{ matches.length }} intercambio{{ matches.length !== 1 ? 's' : '' }} que coincide{{ matches.length !== 1 ? 'n' : '' }} con tus stickers</p>
+        <p class="text-gray-600">Encontramos {{ matches.length }} intercambio{{ matches.length !== 1 ? 's' : '' }} que coincide{{ matches.length !== 1 ? 'n' : '' }} con tus estampas</p>
       </div>
 
       <!-- Matches List -->

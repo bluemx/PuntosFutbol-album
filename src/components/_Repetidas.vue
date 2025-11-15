@@ -5,7 +5,7 @@
     @click="close">
     
     <div 
-      class="bg-white rounded-lg p-6 w-full max-w-6xl max-h-[85vh] flex flex-col shadow-xl"
+      class="bg-white/50 backdrop-blur-md rounded-lg p-6 w-full max-w-6xl max-h-[85vh] flex flex-col shadow-xl"
       @click.stop>
       
       <!-- Header -->
@@ -51,7 +51,7 @@
                 ]">
                 {{ 
                   userStore.isLoading ? 'Procesando...' : 
-                  hasCardInAlbum(card.identifier) ? 'Reemplazar' : 'Colocar en álbum' 
+                  hasCardInAlbum(card.identifier) ? 'Reemplazar' : 'Pegar en álbum' 
                 }}
               </button>
             </div>

@@ -24,7 +24,7 @@
             <h2 class="text-2xl font-bold text-pfblue">Mis stickers</h2>
             <p v-if="hasNewCards" class="text-sm text-orange-600 font-medium flex items-center">
               <Icon icon="mdi:star" class="w-4 h-4 mr-1" />
-              ¡Tienes cartas nuevas del sobre!
+              ¡Tienes nuevas estampas!
             </p>
           </div>
           <button 
@@ -34,12 +34,24 @@
           </button>
         </div>
 
+        <!-- Search Filter -->
+        <div class="mb-4">
+          <div class="relative">
+            <Icon icon="mdi:magnify" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input 
+              v-model="searchQuery"
+              type="text"
+              placeholder="Buscar por número o descripción..."
+              class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pfblue focus:border-transparent">
+          </div>
+        </div>
+
         <!-- Horizontal Carousel -->
-        <div v-if="extraCards.length > 0" class="flex-1 overflow-hidden">
+        <div v-if="filteredExtraCards.length > 0" class="flex-1 overflow-hidden">
           <div class="h-full overflow-x-auto overflow-y-hidden pb-4">
             <div class="flex gap-6 h-full items-center px-4 min-w-max">
               <div 
-                v-for="card in extraCards" 
+                v-for="card in filteredExtraCards" 
                 :key="card.id"
                 class="shrink-0 flex flex-col items-center cursor-pointer hover:scale-105 transition-transform"
                 @click="openCardDetail(card)">
@@ -61,17 +73,32 @@
                     Repetida
                   </div>
                 </div>
+
+                <!-- Card Info -->
+                <div class="text-center text-xs text-gray-600 max-w-[180px]">
+                  <div class="font-semibold truncate">{{ getCardDescription(card.identifier) }}</div>
+                  <div class="text-gray-500">{{ getCategoryName(card.identifier) }}</div>
+                  <div class="text-gray-400">{{ getCardType(card.identifier) }}</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Empty State -->
-        <div v-else class="text-center py-12">
+        <div v-else-if="extraCards.length === 0" class="text-center py-12">
           <div class="text-gray-400 mb-4">
             <Icon icon="mdi:cards-outline" class="w-16 h-16 mx-auto" />
           </div>
           <p class="text-gray-600">No tienes stickers fuera del álbum</p>
+        </div>
+
+        <!-- No Results State -->
+        <div v-else class="text-center py-12">
+          <div class="text-gray-400 mb-4">
+            <Icon icon="mdi:magnify" class="w-16 h-16 mx-auto" />
+          </div>
+          <p class="text-gray-600">No se encontraron stickers con "{{ searchQuery }}"</p>
         </div>
       </div>
     </div>
@@ -98,7 +125,10 @@
         <!-- Card Info -->
         <div class="text-center mb-4">
           <p class="text-lg font-bold text-pfblue">
-            Sticker #{{ selectedCard.identifier }}
+            {{ getCardDescription(selectedCard.identifier) }}
+          </p>
+          <p class="text-sm text-gray-500 mt-1">
+            Estampa #{{ selectedCard.identifier }}
           </p>
           <p v-if="hasCardInAlbum(selectedCard.identifier)" class="text-sm text-yellow-600 font-medium mt-1">
             Ya tienes esta carta en el álbum
@@ -118,7 +148,7 @@
             <Icon icon="mdi:star-plus" class="w-4 h-4 mr-2" />
             {{ 
               userStore.isLoading ? 'Procesando...' : 
-              hasCardInAlbum(selectedCard.identifier) ? 'Reemplazar' : 'Colocar en álbum' 
+              hasCardInAlbum(selectedCard.identifier) ? 'Reemplazar' : 'Pegar en álbum' 
             }}
           </button>
           <button 
@@ -138,10 +168,13 @@ import { useUserStore } from '../stores/user'
 import { Icon } from '@iconify/vue'
 import CardRenderer from './CardRenderer.vue'
 import { useNewlyOpenedCards } from '../composables/useNewlyOpenedCards'
+import { cardsDatabase } from '../data/cards'
+import { categoriesDatabase } from '../data/categories'
 
 const userStore = useUserStore()
 const showModal = ref(false)
 const selectedCard = ref<any>(null)
+const searchQuery = ref('')
 const { isNewlyOpened, clearNewlyOpenedCards } = useNewlyOpenedCards()
 
 // Get all cards where inAlbum is false, ordered by identifier ascending
@@ -153,6 +186,31 @@ const extraCards = computed(() => {
       const idB = b.identifier ? Number(b.identifier) : 0
       return idA - idB
     })
+})
+
+// Filter cards based on search query
+const filteredExtraCards = computed(() => {
+  if (!searchQuery.value.trim()) {
+    return extraCards.value
+  }
+
+  const query = searchQuery.value.toLowerCase().trim()
+  
+  return extraCards.value.filter(card => {
+    // Search by identifier
+    const identifier = card.identifier?.toString() || ''
+    if (identifier.includes(query)) {
+      return true
+    }
+
+    // Search by description from cardsDatabase
+    const cardData = cardsDatabase.find(c => c.identifier === Number(card.identifier))
+    if (cardData && cardData.desc.toLowerCase().includes(query)) {
+      return true
+    }
+
+    return false
+  })
 })
 
 // Count cards that are not in album (repetidas/extras)
@@ -171,6 +229,32 @@ const hasCardInAlbum = (identifier: string | number | null) => {
   return userStore.ownedCards.some(card => 
     card.inAlbum && card.identifier && Number(card.identifier) === Number(identifier)
   )
+}
+
+// Get card description from database
+const getCardDescription = (identifier: string | number | null) => {
+  if (identifier === null) return ''
+  const cardData = cardsDatabase.find(c => c.identifier === Number(identifier))
+  return cardData?.desc || `Estampa #${identifier}`
+}
+
+// Get category name from database
+const getCategoryName = (identifier: string | number | null) => {
+  if (identifier === null) return ''
+  const cardData = cardsDatabase.find(c => c.identifier === Number(identifier))
+  if (!cardData) return ''
+  const category = categoriesDatabase.find(cat => cat.id === cardData.category)
+  return category?.name || ''
+}
+
+// Get card type (Normal, Metal, or Animada)
+const getCardType = (identifier: string | number | null) => {
+  if (identifier === null) return 'Normal'
+  const cardData = cardsDatabase.find(c => c.identifier === Number(identifier))
+  if (!cardData) return 'Normal'
+  if (cardData.metal) return 'Metal'
+  if (cardData.anim) return 'Animada'
+  return 'Normal'
 }
 
 // Open card detail modal
@@ -212,6 +296,7 @@ async function addToAlbum(card: any) {
 
 function close() {
   showModal.value = false
+  searchQuery.value = ''
   // Clear new card highlights when closing
   clearNewlyOpenedCards()
 }
@@ -219,6 +304,7 @@ function close() {
 // Expose methods to parent component
 function openModal() {
   showModal.value = true
+  searchQuery.value = ''
 }
 
 defineExpose({

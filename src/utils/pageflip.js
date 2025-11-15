@@ -13,7 +13,7 @@ export async function startFlip(thebookRef, onFlip) {
         minWidth: 280,
         maxShadowOpacity: 0.3, // Half shadow intensity
         showCover: true,
-        useMouseEvents: false,
+        //useMouseEvents: false,
         disableFlipByClick: true,
         showPageCorners: false,
         mobileScrollSupport: false,

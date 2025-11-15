@@ -15,7 +15,7 @@ export const categoriesDatabase: Category[] = [
   { id: 6, name: "Países", order: 4 },
   { id: 7, name: "Mascotas", order: 5 },
   { id: 8, name: "Eliminatorias", order: 10 },
-  { id: 9, name: "Tofeos", order: 7 },
+  { id: 9, name: "Trofeos", order: 7 },
   { id: 10, name: "Hechos históricos", order: 8 },
   { id: 11, name: "Murales urbanos", order: 9 },
   { id: 12, name: "Patrocinadores", order: 11 }

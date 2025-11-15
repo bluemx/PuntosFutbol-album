@@ -20,7 +20,7 @@
         
         <!-- Header -->
         <div class="flex justify-between items-center mb-6">
-          <h2 class="text-2xl font-bold text-pfblue">Intercambios de Stickers</h2>
+          <h2 class="text-2xl font-bold text-pfblue">Intercambios de Estampas</h2>
           <button 
             @click="close"
             class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100">
@@ -75,20 +75,39 @@
             <Icon icon="mdi:hand-coin" class="w-6 h-6" />
             Tu Oferta ({{ selectedOffer.length }} seleccionados)
           </h3>
-          <p class="text-sm text-gray-600 mb-4">Selecciona los stickers que quieres ofrecer (stickers repetidos)</p>
+          <p class="text-sm text-gray-600 mb-4">Selecciona las estampas que quieres ofrecer (estampas repetidas)</p>
+          
+          <!-- Search Filter -->
+          <div class="mb-4">
+            <div class="relative">
+              <Icon icon="mdi:magnify" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input 
+                v-model="offerSearchQuery"
+                type="text"
+                placeholder="Buscar por número o descripción..."
+                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pfblue focus:border-transparent">
+            </div>
+          </div>
           
           <div 
             v-if="availableStickers.length === 0"
             class="text-center py-8 text-gray-500">
             <Icon icon="mdi:alert-circle" class="w-12 h-12 mx-auto mb-2 text-gray-400" />
-            <p>No tienes stickers repetidos disponibles para intercambiar</p>
+            <p>No tienes estampas repetidas disponibles para intercambiar</p>
+          </div>
+
+          <div 
+            v-else-if="filteredAvailableStickers.length === 0"
+            class="text-center py-8 text-gray-500">
+            <Icon icon="mdi:magnify" class="w-12 h-12 mx-auto mb-2 text-gray-400" />
+            <p>No se encontraron estampas con "{{ offerSearchQuery }}"</p>
           </div>
           
           <div v-else class="flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory">
             <div 
-              v-for="card in availableStickers" 
+              v-for="card in filteredAvailableStickers" 
               :key="card.id"
-              class="relative shrink-0 snap-start cursor-pointer"
+              class="relative shrink-0 snap-start cursor-pointer flex flex-col items-center"
               :class="{ 'ring-4 ring-pfblue': isInOffer(card.id) }"
               @click="toggleOffer(card)">
               
@@ -105,6 +124,18 @@
                   class="absolute top-2 right-2 w-8 h-8 bg-pfblue rounded-full flex items-center justify-center shadow-lg">
                   <Icon icon="mdi:check" class="w-6 h-6 text-white" />
                 </div>
+
+                <!-- Already in Album Indicator -->
+                <div v-if="hasCardInAlbum(card.identifier)" class="absolute top-2 left-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+                  Repetida
+                </div>
+              </div>
+
+              <!-- Card Info -->
+              <div class="text-center text-xs text-gray-600 max-w-32 mt-2">
+                <div class="font-semibold truncate">{{ getCardDescription(card.identifier) }}</div>
+                <div class="text-gray-500">{{ getCategoryName(card.identifier) }}</div>
+                <div class="text-gray-400">{{ getCardType(card.identifier) }}</div>
               </div>
             </div>
           </div>
@@ -114,9 +145,9 @@
         <div class="mb-8">
           <h3 class="text-xl font-bold text-green-600 mb-3 flex items-center gap-2">
             <Icon icon="mdi:cards-heart" class="w-6 h-6" />
-            Stickers Buscados ({{ selectedWanted.length }} seleccionados)
+            Estampas Buscadas ({{ selectedWanted.length }} seleccionados)
           </h3>
-          <p class="text-sm text-gray-600 mb-4">Selecciona los stickers que necesitas para tu álbum</p>
+          <p class="text-sm text-gray-600 mb-4">Selecciona las estampas por las que quieres intercambiar</p>
           
           <!-- Search Box -->
           <div class="mb-4">
@@ -140,20 +171,21 @@
               :class="{
                 'bg-pfblue text-white shadow-lg scale-110': isInWanted(card.identifier),
                 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200': !isInWanted(card.identifier),
-                'opacity-50': userStore.ownsCard(card.identifier)
+                'opacity-50 !bg-teal-500 !text-white !alert': userStore.ownsCard(card.identifier)
               }">
               {{ card.identifier }}
             </button>
           </div>
-          
-          <p class="text-xs text-gray-500 mt-2">
-            <Icon icon="mdi:information" class="inline w-4 h-4" />
-            Los números en gris son stickers que ya tienes en tu álbum
-          </p>
+          <div class="mt-4">
+            <p class="text-xs  alert bg-teal-300 w-fit">
+                <Icon icon="mdi:information" class="inline w-4 h-4" />
+                Estampas que ya tienes
+            </p>
+          </div>
         </div>
 
         <!-- Action Button -->
-        <div class="flex gap-3">
+        <div class="flex gap-3 md:flex-row flex-col">
           <button 
             @click="startExchange"
             :disabled="selectedOffer.length === 0 || selectedWanted.length === 0 || isLoading"
@@ -201,7 +233,7 @@
         <!-- Message -->
         <h3 class="text-2xl font-bold text-center text-pfblue mb-4">¡Intercambio Iniciado!</h3>
         <p class="text-center text-gray-600 mb-6">
-          Se encontraron {{ exchangeMatches.length }} usuario(s) con los stickers que buscas.
+          Se encontraron {{ exchangeMatches.length }} socios(s) Puntos Futbol con las estampas que buscas.
           <br>
           Espera a que alguien de la comunidad acepte tu intercambio.
         </p>
@@ -219,7 +251,7 @@
             </div>
             <div class="text-right">
               <p class="text-lg font-bold text-green-600">{{ match.stickers }}</p>
-              <p class="text-xs text-gray-500">stickers</p>
+              <p class="text-xs text-gray-500">estampas</p>
             </div>
           </div>
         </div>
@@ -254,7 +286,7 @@
         <!-- Message -->
         <h3 class="text-2xl font-bold text-center text-pfblue mb-4">Sin Coincidencias</h3>
         <p class="text-center text-gray-600 mb-6">
-          No hay usuarios con los stickers que buscas en este momento.
+          No hay socios Puntos Futbol con las estampas que buscas en este momento.
           <br><br>
           Intenta con un intercambio diferente o vuelve más tarde.
         </p>
@@ -264,6 +296,35 @@
           @click="closeNoMatches"
           class="btn w-full bg-pfblue hover:bg-pfblue/90 text-white">
           Intentar de Nuevo
+        </button>
+      </div>
+    </div>
+
+    <!-- Cancel Success Modal -->
+    <div 
+      v-if="showCancelSuccessModal" 
+      class="fixed inset-0 z-60 flex items-center justify-center bg-black/50 backdrop-blur-md"
+      @click="closeCancelSuccess">
+      
+      <div 
+        class="bg-white rounded-lg p-8 max-w-md shadow-xl"
+        @click.stop>
+        
+        <!-- Success Icon -->
+        <div class="flex justify-center mb-4">
+          <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+            <Icon icon="mdi:check-circle" class="w-12 h-12 text-green-500" />
+          </div>
+        </div>
+        
+        <!-- Message -->
+        <h3 class="text-2xl font-bold text-center text-pfblue mb-4">Intercambio Cancelado</h3>
+        
+        <!-- Close Button -->
+        <button 
+          @click="closeCancelSuccess"
+          class="btn w-full bg-green-500 hover:bg-green-600 text-white">
+          Entendido
         </button>
       </div>
     </div>
@@ -277,15 +338,18 @@ import { Icon } from '@iconify/vue'
 import { apiService, type ExchangeMatch, type CurrentExchange } from '../services/api'
 import CardRenderer from './CardRenderer.vue'
 import { cardsDatabase, type Card } from '../data/cards'
+import { categoriesDatabase } from '../data/categories'
 import type { UserCard } from '../stores/user'
 
 const userStore = useUserStore()
 const showModal = ref(false)
 const showSuccessModal = ref(false)
 const showNoMatchesModal = ref(false)
+const showCancelSuccessModal = ref(false)
 const isLoading = ref(false)
 const error = ref<string | null>(null)
 const searchQuery = ref('')
+const offerSearchQuery = ref('')
 
 // Selection state
 const selectedOffer = ref<number[]>([])
@@ -307,6 +371,65 @@ const availableStickers = computed(() => {
     })
 })
 
+// Filter available stickers based on search query
+const filteredAvailableStickers = computed(() => {
+  if (!offerSearchQuery.value.trim()) {
+    return availableStickers.value
+  }
+
+  const query = offerSearchQuery.value.toLowerCase().trim()
+  
+  return availableStickers.value.filter(card => {
+    // Search by identifier
+    const identifier = card.identifier?.toString() || ''
+    if (identifier.includes(query)) {
+      return true
+    }
+
+    // Search by description from cardsDatabase
+    const cardData = cardsDatabase.find(c => c.identifier === Number(card.identifier))
+    if (cardData && cardData.desc.toLowerCase().includes(query)) {
+      return true
+    }
+
+    return false
+  })
+})
+
+// Check if a card with the same identifier is already in album
+const hasCardInAlbum = (identifier: string | number | null) => {
+  if (identifier === null) return false
+  return userStore.ownedCards.some(card => 
+    card.inAlbum && card.identifier && Number(card.identifier) === Number(identifier)
+  )
+}
+
+// Get card description from database
+const getCardDescription = (identifier: string | number | null) => {
+  if (identifier === null) return ''
+  const cardData = cardsDatabase.find(c => c.identifier === Number(identifier))
+  return cardData?.desc || `Estampa #${identifier}`
+}
+
+// Get category name from database
+const getCategoryName = (identifier: string | number | null) => {
+  if (identifier === null) return ''
+  const cardData = cardsDatabase.find(c => c.identifier === Number(identifier))
+  if (!cardData) return ''
+  const category = categoriesDatabase.find(cat => cat.id === cardData.category)
+  return category?.name || ''
+}
+
+// Get card type (Normal, Metal, or Animada)
+const getCardType = (identifier: string | number | null) => {
+  if (identifier === null) return 'Normal'
+  const cardData = cardsDatabase.find(c => c.identifier === Number(identifier))
+  if (!cardData) return 'Normal'
+  if (cardData.metal) return 'Metal'
+  if (cardData.anim) return 'Animada'
+  return 'Normal'
+}
+
 // Filter cards for wanted section
 const filteredCards = computed(() => {
   if (!searchQuery.value) return cardsDatabase
@@ -322,6 +445,8 @@ function openExchange() {
   selectedOffer.value = []
   selectedWanted.value = []
   error.value = null
+  offerSearchQuery.value = ''
+  searchQuery.value = ''
   loadMyExchanges()
 }
 
@@ -363,6 +488,8 @@ async function cancelExchange(exchangeId: number) {
     if (response.success) {
       // Remove from local list
       myExchanges.value = myExchanges.value.filter(ex => ex.exchangeId !== exchangeId)
+      // Show success message
+      showCancelSuccessModal.value = true
     } else {
       error.value = response.data?.message || 'Error al cancelar el intercambio'
     }
@@ -385,6 +512,10 @@ function closeSuccess() {
 
 function closeNoMatches() {
   showNoMatchesModal.value = false
+}
+
+function closeCancelSuccess() {
+  showCancelSuccessModal.value = false
 }
 
 function isInOffer(cardId: number): boolean {

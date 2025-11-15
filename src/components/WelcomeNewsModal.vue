@@ -16,7 +16,7 @@
           </div>
         </div>
         <h2 class="text-3xl font-bold text-pfblue mb-2">¡Novedades en tu Álbum!</h2>
-        <p class="text-gray-600">Tienes {{ stickers.length }} sticker{{ stickers.length !== 1 ? 's' : '' }} nuevo{{ stickers.length !== 1 ? 's' : '' }}</p>
+        <p class="text-gray-600">Tienes {{ stickers.length }} estampa{{ stickers.length !== 1 ? 's' : '' }} nueva{{ stickers.length !== 1 ? 's' : '' }}</p>
       </div>
 
       <!-- Stickers Grid -->
