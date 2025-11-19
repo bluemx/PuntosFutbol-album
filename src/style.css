@@ -5,6 +5,7 @@
 /* Custom Colors & Fonts */
 @theme {
   --color-pfblue: #0a1e3f;
+  --color-pfcyan: #88b7ea;
   --font-family-sans: "Fira Sans Condensed", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 
 }
@@ -36,11 +37,11 @@
   --popover-foreground: oklch(0.4712 0 0);
   --primary: oklch(0.3790 0.1460 265.5220);
   --primary-foreground: oklch(1.0000 0 0);
-  --secondary: oklch(0.7070 0.1650 254.6240);
+  --secondary: oklch(0.7651 0.0891 251.04);
   --secondary-foreground: oklch(0.3790 0.1460 265.5220);
-  --muted: oklch(0.9010 0.0580 230.9020);
+  --muted: oklch(0.7651 0.0891 251.04);
   --muted-foreground: oklch(0.5795 0 0);
-  --accent: oklch(0.8650 0.1270 207.0780);
+  --accent: oklch(0.7651 0.0891 251.04);
   --accent-foreground: oklch(0.3211 0 0);
   --destructive: oklch(0.6670 0.2950 322.1500);
   --destructive-foreground: oklch(1.0000 0 0);
@@ -50,7 +51,7 @@
   --chart-1: oklch(0.6230 0.2140 259.8150);
   --chart-2: oklch(0.7150 0.1430 215.2210);
   --chart-3: oklch(0.6850 0.1690 237.3230);
-  --chart-4: oklch(0.8090 0.1050 251.8130);
+  --chart-4: oklch(0.7651 0.0891 251.04);
   --chart-5: oklch(0.8650 0.1270 207.0780);
   --sidebar: oklch(0.8820 0.0590 254.1280);
   --sidebar-foreground: oklch(0.3211 0 0);
