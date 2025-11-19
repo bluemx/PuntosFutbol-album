@@ -63,7 +63,7 @@ const emit = defineEmits<{
 
 const userStore = useUserStore()
 
-let customerId = '102' // Development default
+let customerId = '119' // Development default
 
 const loadUserData = async () => {
   try {

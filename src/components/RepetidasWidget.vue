@@ -187,8 +187,8 @@ import { categoriesDatabase } from '../data/categories'
 const userStore = useUserStore()
 const showModal = ref(false)
 const selectedCard = ref<any>(null)
-const selectedCategory = ref<number | ''>()
-const selectedNumber = ref<number | ''>()
+const selectedCategory = ref<number | ''>('')
+const selectedNumber = ref<number | ''>('')
 const { isNewlyOpened, clearNewlyOpenedCards } = useNewlyOpenedCards()
 
 // Sorted categories by order
@@ -210,16 +210,16 @@ const extraCards = computed(() => {
 // Filter cards based on category and number
 const filteredExtraCards = computed(() => {
   return extraCards.value.filter(card => {
-    // Filter by number if specified
-    if (selectedNumber.value !== '' && selectedNumber.value !== null) {
+    // Filter by number if specified (only if it's a valid number)
+    if (selectedNumber.value !== '' && selectedNumber.value !== null && selectedNumber.value !== undefined && !isNaN(Number(selectedNumber.value))) {
       const cardIdentifier = card.identifier ? Number(card.identifier) : 0
-      if (cardIdentifier !== selectedNumber.value) {
+      if (cardIdentifier !== Number(selectedNumber.value)) {
         return false
       }
     }
 
     // Filter by category if specified
-    if (selectedCategory.value !== '' && selectedCategory.value !== null) {
+    if (selectedCategory.value !== '' && selectedCategory.value !== null && selectedCategory.value !== undefined) {
       const cardData = cardsDatabase.find(c => c.identifier === Number(card.identifier))
       if (!cardData || cardData.category !== selectedCategory.value) {
         return false

@@ -362,8 +362,8 @@ const showCancelSuccessModal = ref(false)
 const isLoading = ref(false)
 const error = ref<string | null>(null)
 const searchQuery = ref('')
-const selectedOfferCategory = ref<number | ''>()
-const selectedOfferNumber = ref<number | ''>()
+const selectedOfferCategory = ref<number | ''>('')
+const selectedOfferNumber = ref<number | ''>('')
 
 // Sorted categories by order
 const sortedCategories = computed(() => {
@@ -393,16 +393,16 @@ const availableStickers = computed(() => {
 // Filter available stickers based on category and number
 const filteredAvailableStickers = computed(() => {
   return availableStickers.value.filter(card => {
-    // Filter by number if specified
-    if (selectedOfferNumber.value !== '' && selectedOfferNumber.value !== null) {
+    // Filter by number if specified (only if it's a valid number)
+    if (selectedOfferNumber.value !== '' && selectedOfferNumber.value !== null && selectedOfferNumber.value !== undefined && !isNaN(Number(selectedOfferNumber.value))) {
       const cardIdentifier = card.identifier ? Number(card.identifier) : 0
-      if (cardIdentifier !== selectedOfferNumber.value) {
+      if (cardIdentifier !== Number(selectedOfferNumber.value)) {
         return false
       }
     }
 
     // Filter by category if specified
-    if (selectedOfferCategory.value !== '' && selectedOfferCategory.value !== null) {
+    if (selectedOfferCategory.value !== '' && selectedOfferCategory.value !== null && selectedOfferCategory.value !== undefined) {
       const cardData = cardsDatabase.find(c => c.identifier === Number(card.identifier))
       if (!cardData || cardData.category !== selectedOfferCategory.value) {
         return false

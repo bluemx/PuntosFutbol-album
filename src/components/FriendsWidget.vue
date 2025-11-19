@@ -296,8 +296,8 @@ const searchQuery = ref('')
 const selectedFriend = ref<Friend | null>(null)
 const selectedStickers = ref<number[]>([])
 const isSending = ref(false)
-const selectedCategory = ref<number | ''>()
-const selectedNumber = ref<number | ''>()
+const selectedCategory = ref<number | ''>('')
+const selectedNumber = ref<number | ''>('')
 
 // Sorted categories by order
 const sortedCategories = computed(() => {
@@ -334,16 +334,16 @@ const availableStickers = computed(() => {
 // Filter available stickers based on category and number
 const filteredAvailableStickers = computed(() => {
   return availableStickers.value.filter(card => {
-    // Filter by number if specified
-    if (selectedNumber.value !== '' && selectedNumber.value !== null) {
+    // Filter by number if specified (only if it's a valid number)
+    if (selectedNumber.value !== '' && selectedNumber.value !== null && selectedNumber.value !== undefined && !isNaN(Number(selectedNumber.value))) {
       const cardIdentifier = card.identifier ? Number(card.identifier) : 0
-      if (cardIdentifier !== selectedNumber.value) {
+      if (cardIdentifier !== Number(selectedNumber.value)) {
         return false
       }
     }
 
     // Filter by category if specified
-    if (selectedCategory.value !== '' && selectedCategory.value !== null) {
+    if (selectedCategory.value !== '' && selectedCategory.value !== null && selectedCategory.value !== undefined) {
       const cardData = cardsDatabase.find(c => c.identifier === Number(card.identifier))
       if (!cardData || cardData.category !== selectedCategory.value) {
         return false
