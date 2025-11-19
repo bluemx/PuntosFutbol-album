@@ -1,8 +1,11 @@
 <template>
     <div class="page relative innerpage card p-0 overflow-hidden bg-pfblue" >
         <div class="page-content flex flex-col h-full relative ">
+            
+          <!--
             <div class="absolute inset-0  z-0 bg-linear-to-b from-blue-900 to-black/0" ></div>
-            <div class="absolute inset-0  opacity-50 mix-blend-multiply" :style="bgStyle(getPageImageUrl())"></div>
+          -->
+            <div class="absolute inset-0  opacity-100 " :style="bgStyle(getPageImageUrl())"></div>
 
 
             
