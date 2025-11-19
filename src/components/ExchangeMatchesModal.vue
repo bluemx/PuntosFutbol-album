@@ -206,8 +206,8 @@ async function checkForExchanges() {
         }
       }
       
-      // If user has at least one of the wanted cards as duplicate, it's a match
-      if (matchedCards.length > 0) {
+      // Only show as match if user has ALL the wanted cards as duplicates
+      if (matchedCards.length === wantedIdentifiers.length) {
         matchedExchanges.push({
           exchange,
           matchedWantedCards: matchedCards

@@ -155,7 +155,7 @@ export const expectedDistribution = {
   "Jugadas": { cards: 84, pages: [12, 12, 12, 12, 12, 12, 12] }, // 7 pages
   "Países": { cards: 50, pages: [10, 10, 10, 10, 10] }, // 5 pages
   "Mascotas": { cards: 49, pages: [9, 8, 8, 8, 8, 8] }, // 6 pages
-  "Fanáticos": { cards: 49, pages: [9, 8, 8, 8, 8, 8] }, // 6 pages
+  "Fans": { cards: 49, pages: [9, 8, 8, 8, 8, 8] }, // 6 pages
   "Mundiales pasados": { cards: 22, pages: [11, 11] }, // 2 pages
   "Hechos históricos": { cards: 45, pages: [9, 9, 9, 9, 9] }, // 5 pages
   "Balones": { cards: 22, pages: [11, 11] },          // 2 pages

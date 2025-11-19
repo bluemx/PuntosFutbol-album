@@ -77,15 +77,28 @@
           </h3>
           <p class="text-sm text-gray-600 mb-4">Selecciona las estampas que quieres ofrecer (estampas repetidas)</p>
           
-          <!-- Search Filter -->
-          <div class="mb-4">
-            <div class="relative">
-              <Icon icon="mdi:magnify" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <!-- Filter Controls -->
+          <div class="mb-4 flex gap-3">
+            <!-- Category Selector -->
+            <div class="flex-1">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+              <select 
+                v-model="selectedOfferCategory"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pfblue focus:border-transparent">
+                <option value="">Todas las categorías</option>
+                <option v-for="cat in sortedCategories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+              </select>
+            </div>
+            
+            <!-- Number Chooser -->
+            <div class="w-48">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Número</label>
               <input 
-                v-model="offerSearchQuery"
-                type="text"
-                placeholder="Buscar por número o descripción..."
-                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pfblue focus:border-transparent">
+                v-model.number="selectedOfferNumber"
+                type="number"
+                min="1"
+                placeholder="Número de estampa"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pfblue focus:border-transparent">
             </div>
           </div>
           
@@ -99,8 +112,8 @@
           <div 
             v-else-if="filteredAvailableStickers.length === 0"
             class="text-center py-8 text-gray-500">
-            <Icon icon="mdi:magnify" class="w-12 h-12 mx-auto mb-2 text-gray-400" />
-            <p>No se encontraron estampas con "{{ offerSearchQuery }}"</p>
+            <Icon icon="mdi:filter-off" class="w-12 h-12 mx-auto mb-2 text-gray-400" />
+            <p>No se encontraron estampas con los filtros seleccionados</p>
           </div>
           
           <div v-else class="flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory">
@@ -349,7 +362,13 @@ const showCancelSuccessModal = ref(false)
 const isLoading = ref(false)
 const error = ref<string | null>(null)
 const searchQuery = ref('')
-const offerSearchQuery = ref('')
+const selectedOfferCategory = ref<number | ''>()
+const selectedOfferNumber = ref<number | ''>()
+
+// Sorted categories by order
+const sortedCategories = computed(() => {
+  return [...categoriesDatabase].sort((a, b) => a.order - b.order)
+})
 
 // Selection state
 const selectedOffer = ref<number[]>([])
@@ -371,28 +390,26 @@ const availableStickers = computed(() => {
     })
 })
 
-// Filter available stickers based on search query
+// Filter available stickers based on category and number
 const filteredAvailableStickers = computed(() => {
-  if (!offerSearchQuery.value.trim()) {
-    return availableStickers.value
-  }
-
-  const query = offerSearchQuery.value.toLowerCase().trim()
-  
   return availableStickers.value.filter(card => {
-    // Search by identifier
-    const identifier = card.identifier?.toString() || ''
-    if (identifier.includes(query)) {
-      return true
+    // Filter by number if specified
+    if (selectedOfferNumber.value !== '' && selectedOfferNumber.value !== null) {
+      const cardIdentifier = card.identifier ? Number(card.identifier) : 0
+      if (cardIdentifier !== selectedOfferNumber.value) {
+        return false
+      }
     }
 
-    // Search by description from cardsDatabase
-    const cardData = cardsDatabase.find(c => c.identifier === Number(card.identifier))
-    if (cardData && cardData.desc.toLowerCase().includes(query)) {
-      return true
+    // Filter by category if specified
+    if (selectedOfferCategory.value !== '' && selectedOfferCategory.value !== null) {
+      const cardData = cardsDatabase.find(c => c.identifier === Number(card.identifier))
+      if (!cardData || cardData.category !== selectedOfferCategory.value) {
+        return false
+      }
     }
 
-    return false
+    return true
   })
 })
 
@@ -422,12 +439,12 @@ const getCategoryName = (identifier: string | number | null) => {
 
 // Get card type (Normal, Metal, or Animada)
 const getCardType = (identifier: string | number | null) => {
-  if (identifier === null) return 'Normal'
+  if (identifier === null) return 'Común'
   const cardData = cardsDatabase.find(c => c.identifier === Number(identifier))
-  if (!cardData) return 'Normal'
+  if (!cardData) return 'Común'
   if (cardData.metal) return 'Metal'
   if (cardData.anim) return 'Animada'
-  return 'Normal'
+  return 'Común'
 }
 
 // Filter cards for wanted section
@@ -445,7 +462,8 @@ function openExchange() {
   selectedOffer.value = []
   selectedWanted.value = []
   error.value = null
-  offerSearchQuery.value = ''
+  selectedOfferCategory.value = ''
+  selectedOfferNumber.value = ''
   searchQuery.value = ''
   loadMyExchanges()
 }

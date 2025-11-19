@@ -36,7 +36,7 @@
             <input 
               v-model="searchQuery"
               type="text"
-              placeholder="Buscar por nombre..."
+              placeholder="Buscar por alias..."
               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pfblue focus:border-transparent">
           </div>
         </div>
@@ -84,7 +84,7 @@
               <div class="flex items-center gap-2 mt-1">
                 <Icon icon="mdi:cards-outline" class="w-4 h-4 text-gray-500" />
                 <span class="text-sm text-gray-600">
-                  {{ friend.notInAlbum }} estampas sin pegar
+                  {{ friend.notInAlbum }} estampas
                 </span>
               </div>
             </div>
@@ -141,15 +141,28 @@
           </button>
         </div>
 
-        <!-- Search Filter -->
-        <div class="mb-4">
-          <div class="relative">
-            <Icon icon="mdi:magnify" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <!-- Filter Controls -->
+        <div class="mb-4 flex gap-3">
+          <!-- Category Selector -->
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+            <select 
+              v-model="selectedCategory"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pfblue focus:border-transparent">
+              <option value="">Todas las categorías</option>
+              <option v-for="cat in sortedCategories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+            </select>
+          </div>
+          
+          <!-- Number Chooser -->
+          <div class="w-48">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Número</label>
             <input 
-              v-model="stickerSearchQuery"
-              type="text"
-              placeholder="Buscar por número o descripción..."
-              class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pfblue focus:border-transparent">
+              v-model.number="selectedNumber"
+              type="number"
+              min="1"
+              placeholder="Número de estampa"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pfblue focus:border-transparent">
           </div>
         </div>
 
@@ -206,8 +219,8 @@
         <!-- No Results State -->
         <div v-else class="flex-1 flex items-center justify-center">
           <div class="text-center py-12">
-            <Icon icon="mdi:magnify" class="w-16 h-16 mx-auto text-gray-400" />
-            <p class="text-gray-600 mt-4">No se encontraron estampas con "{{ stickerSearchQuery }}"</p>
+            <Icon icon="mdi:filter-off" class="w-16 h-16 mx-auto text-gray-400" />
+            <p class="text-gray-600 mt-4">No se encontraron estampas con los filtros seleccionados</p>
           </div>
         </div>
 
@@ -283,7 +296,13 @@ const searchQuery = ref('')
 const selectedFriend = ref<Friend | null>(null)
 const selectedStickers = ref<number[]>([])
 const isSending = ref(false)
-const stickerSearchQuery = ref('')
+const selectedCategory = ref<number | ''>()
+const selectedNumber = ref<number | ''>()
+
+// Sorted categories by order
+const sortedCategories = computed(() => {
+  return [...categoriesDatabase].sort((a, b) => a.order - b.order)
+})
 
 // Confirmation message state
 const showConfirmation = ref(false)
@@ -312,28 +331,26 @@ const availableStickers = computed(() => {
     })
 })
 
-// Filter available stickers based on search query
+// Filter available stickers based on category and number
 const filteredAvailableStickers = computed(() => {
-  if (!stickerSearchQuery.value.trim()) {
-    return availableStickers.value
-  }
-
-  const query = stickerSearchQuery.value.toLowerCase().trim()
-  
   return availableStickers.value.filter(card => {
-    // Search by identifier
-    const identifier = card.identifier?.toString() || ''
-    if (identifier.includes(query)) {
-      return true
+    // Filter by number if specified
+    if (selectedNumber.value !== '' && selectedNumber.value !== null) {
+      const cardIdentifier = card.identifier ? Number(card.identifier) : 0
+      if (cardIdentifier !== selectedNumber.value) {
+        return false
+      }
     }
 
-    // Search by description from cardsDatabase
-    const cardData = cardsDatabase.find(c => c.identifier === Number(card.identifier))
-    if (cardData && cardData.desc.toLowerCase().includes(query)) {
-      return true
+    // Filter by category if specified
+    if (selectedCategory.value !== '' && selectedCategory.value !== null) {
+      const cardData = cardsDatabase.find(c => c.identifier === Number(card.identifier))
+      if (!cardData || cardData.category !== selectedCategory.value) {
+        return false
+      }
     }
 
-    return false
+    return true
   })
 })
 
@@ -363,12 +380,12 @@ const getCategoryName = (identifier: string | number | null) => {
 
 // Get card type (Normal, Metal, or Animada)
 const getCardType = (identifier: string | number | null) => {
-  if (identifier === null) return 'Normal'
+  if (identifier === null) return 'Común'
   const cardData = cardsDatabase.find(c => c.identifier === Number(identifier))
-  if (!cardData) return 'Normal'
+  if (!cardData) return 'Común'
   if (cardData.metal) return 'Metal'
   if (cardData.anim) return 'Animada'
-  return 'Normal'
+  return 'Común'
 }
 
 // Get initials from nickname
@@ -410,13 +427,15 @@ async function loadFriends() {
 function openStickerSelector(friend: Friend) {
   selectedFriend.value = friend
   selectedStickers.value = []
-  stickerSearchQuery.value = '' // Clear search when opening
+  selectedCategory.value = ''
+  selectedNumber.value = ''
 }
 
 function closeStickerSelector() {
   selectedFriend.value = null
   selectedStickers.value = []
-  stickerSearchQuery.value = '' // Clear search when closing
+  selectedCategory.value = ''
+  selectedNumber.value = ''
 }
 
 function toggleSelection(card: { id: number }) {
@@ -478,11 +497,15 @@ async function sendSelectedStickers() {
 function close() {
   showModal.value = false
   searchQuery.value = ''
+  selectedCategory.value = ''
+  selectedNumber.value = ''
 }
 
 // Expose method to open modal from parent
 function openModal() {
   searchQuery.value = ''
+  selectedCategory.value = ''
+  selectedNumber.value = ''
   loadFriends()
 }
 

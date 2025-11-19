@@ -24,7 +24,8 @@
         <div 
           v-for="sticker in stickers" 
           :key="sticker.stickerId"
-          class="bg-linear-to-br from-gray-50 to-gray-100 rounded-lg p-4 shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105">
+          @click="openCardDetail(sticker)"
+          class="bg-linear-to-br from-gray-50 to-gray-100 rounded-lg p-4 shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer">
           
           <!-- Sticker Image -->
           <div class="relative mb-3">
@@ -83,6 +84,82 @@
         ¡Entendido!
       </button>
     </div>
+
+    <!-- Card Detail Modal -->
+    <div 
+      v-if="selectedCard" 
+      class="fixed inset-0 z-60 flex items-center justify-center bg-black/70 backdrop-blur-md"
+      @click="closeCardDetail">
+      
+      <div 
+        class="bg-white rounded-2xl p-8 max-w-2xl shadow-2xl"
+        @click.stop>
+        
+        <!-- Close Button -->
+        <button 
+          @click="closeCardDetail"
+          class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors">
+          <Icon icon="mdi:close" class="w-8 h-8" />
+        </button>
+
+        <!-- Card Image -->
+        <div class="flex justify-center mb-6">
+          <div class="relative">
+            <img 
+              :src="selectedCard.resource" 
+              :alt="`Sticker ${selectedCard.identifier}`"
+              class="max-w-sm w-full h-auto object-contain rounded-lg shadow-lg">
+            
+            <!-- Identifier Badge -->
+            <div class="absolute top-2 right-2 bg-pfblue text-white text-lg font-bold rounded-full w-12 h-12 flex items-center justify-center shadow-lg">
+              {{ selectedCard.identifier }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Card Info -->
+        <div class="space-y-4">
+          <!-- Status -->
+          <div class="flex items-center justify-center gap-2">
+            <Icon 
+              :icon="getStatusIcon(selectedCard.customerStickerStatusID)" 
+              class="w-6 h-6"
+              :class="getStatusColor(selectedCard.customerStickerStatusID)" />
+            <span class="text-lg font-medium text-gray-700">
+              {{ selectedCard.customerStickerStatus }}
+            </span>
+          </div>
+
+          <!-- Giver Info (if it's a gift) -->
+          <div 
+            v-if="selectedCard.nickNameGave" 
+            class="flex items-center justify-center gap-3 bg-gray-50 rounded-lg p-4">
+            
+            <!-- Avatar or Initials -->
+            <div class="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden bg-pfblue text-white text-sm font-bold shrink-0">
+              <img 
+                v-if="selectedCard.avatarImage" 
+                :src="selectedCard.avatarImage" 
+                :alt="selectedCard.nickNameGave"
+                class="w-full h-full object-cover">
+              <span v-else>{{ getInitials(selectedCard.nickNameGave) }}</span>
+            </div>
+            
+            <div>
+              <p class="text-sm text-gray-500">Regalo de:</p>
+              <p class="text-lg font-bold text-pfblue">{{ selectedCard.nickNameGave }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Close Button -->
+        <button 
+          @click="closeCardDetail"
+          class="btn w-full bg-pfblue hover:bg-pfblue/90 text-white mt-6">
+          Cerrar
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -95,6 +172,7 @@ import type { StickerToView } from '../services/api'
 const userStore = useUserStore()
 const showModal = ref(false)
 const stickers = ref<StickerToView[]>([])
+const selectedCard = ref<StickerToView | null>(null)
 
 // Watch for stickersToView changes
 watch(() => userStore.stickersToView, (newStickers) => {
@@ -103,6 +181,14 @@ watch(() => userStore.stickersToView, (newStickers) => {
     showModal.value = true
   }
 }, { immediate: true })
+
+function openCardDetail(card: StickerToView) {
+  selectedCard.value = card
+}
+
+function closeCardDetail() {
+  selectedCard.value = null
+}
 
 function getInitials(name: string): string {
   if (!name) return '?'

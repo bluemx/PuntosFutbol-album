@@ -10,7 +10,7 @@
       
       <!-- Header -->
       <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold text-pfblue">Mis stickers</h2>
+        <h2 class="text-2xl font-bold text-pfblue">Mis estampas</h2>
         <button 
           @click="close"
           class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100">
@@ -64,7 +64,7 @@
         <div class="text-gray-400 mb-4">
           <Icon icon="mdi:cards-outline" class="w-16 h-16 mx-auto" />
         </div>
-        <p class="text-gray-600">No tienes stickers fuera del álbum</p>
+        <p class="text-gray-600">No tienes estampas fuera del álbum</p>
       </div>
     </div>
   </div>

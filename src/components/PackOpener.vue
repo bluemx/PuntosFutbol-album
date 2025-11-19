@@ -34,7 +34,7 @@
             <h2 class="text-2xl font-bold text-pfblue">Abrir Sobres</h2>
             <div class="flex gap-3 mt-2">
               <p v-if="userStore.defaultPacks > 0" class="text-sm text-gray-600 flex items-center gap-1">
-                <span class="font-semibold">Normales:</span>
+                <span class="font-semibold">Comunes:</span>
                 <span class="badge bg-gray-400 text-white">{{ userStore.defaultPacks }}</span>
               </p>
               <p v-if="userStore.goldenPacks > 0" class="text-sm text-gray-600 flex items-center gap-1">
@@ -123,7 +123,7 @@
               >
                 <img 
                   :src="normalPackImg" 
-                  alt="Sobre Normal"
+                  alt="Sobre Común"
                   class="w-40 h-56 object-contain drop-shadow-2xl hover:scale-110 transition-transform"
                 />
               </div>
@@ -211,7 +211,7 @@
               @click="goToRepetidas"
               class="btn btn-primary">
               <Icon icon="mdi:cards-outline" class="w-4 h-4 mr-2" />
-              Ver todos mis stickers
+              Ver todas mis estampas
             </button>
             <button 
               v-if="userStore.totalPacks > 0"
@@ -358,10 +358,10 @@ function getCardDescription(card: UserCard): string {
 function getCardType(card: UserCard): string {
   const identifier = getCardIdentifier(card.resource)
   const cardData = cardsDatabase.find(c => c.identifier === identifier)
-  if (!cardData) return 'Normal'
+  if (!cardData) return 'Común'
   if (cardData.metal) return 'Metal'
   if (cardData.anim) return 'Animada'
-  return 'Normal'
+  return 'Común'
 }
 
 // Open card detail modal

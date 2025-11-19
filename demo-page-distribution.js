@@ -59,7 +59,7 @@ const categories = [
   { id: 2, name: "Jugadas", order: 3, cardCount: 84 },
   { id: 3, name: "Países", order: 4, cardCount: 50 },
   { id: 4, name: "Mascotas", order: 5, cardCount: 49 },
-  { id: 5, name: "Fanáticos", order: 6, cardCount: 49 }
+  { id: 5, name: "Fans", order: 6, cardCount: 49 }
 ];
 
 const MIN_CARDS_PER_PAGE = 8;

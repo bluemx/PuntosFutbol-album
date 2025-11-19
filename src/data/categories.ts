@@ -9,7 +9,7 @@ export const categoriesDatabase: Category[] = [
   { id: 1, name: "Sedes", order: 2 },
   { id: 2, name: "Jugadas", order: 3 },
   
-  { id: 3, name: "Fanáticos", order: 6 },
+  { id: 3, name: "Fans", order: 6 },
   //{ id: 4, name: "Trofeos", order: 7 },
   //{ id: 5, name: "", order: 6 },
   { id: 6, name: "Países", order: 4 },
