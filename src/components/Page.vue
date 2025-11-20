@@ -140,9 +140,11 @@ const isFirstContentPage = computed(() => {
 })
 
 // Check if this is the last content page
+/*
 const isLastContentPage = computed(() => {
   return props.thisPage === albumStore.totalPages
 })
+*/
 
 // Navigation functions using the page flip instance
 const goToNextPage = () => {
