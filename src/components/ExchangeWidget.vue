@@ -95,7 +95,7 @@
 
           <p class="text-xs  alert w-fit mb-4">
                 <Icon icon="mdi:information" class="inline w-4 h-4" />
-                Las estampas que se muestras son estampas no pegadas, pueden incluir repetidas y no repetidas.
+                Las estampas que se muestran son estampas no pegadas, pueden incluir repetidas y no repetidas.
             </p>
 
           
