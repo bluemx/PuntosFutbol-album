@@ -89,7 +89,15 @@
               {{ item.identifier }}<span class="text-xs ml-0.5">{{ item.type }}</span>
             </span>
           </div>
-          <p class="text-sm text-gray-600 mb-4">Selecciona las estampas que quieres ofrecer (estampas repetidas)</p>
+          <p class="text-sm text-gray-600 mb-1">Selecciona las estampas que quieres ofrecer (estampas sin pegar).</p>
+
+          
+
+          <p class="text-xs  alert w-fit mb-4">
+                <Icon icon="mdi:information" class="inline w-4 h-4" />
+                Las estampas que se muestras son estampas no pegadas, pueden incluir repetidas y no repetidas.
+            </p>
+
           
           <!-- Filter Controls -->
           <div class="mb-4 flex gap-3">
@@ -231,7 +239,7 @@
             <button
               @click="selectWantedType('C')"
               class="px-3 py-2 text-sm font-medium rounded-md bg-gray-100 hover:bg-gray-200 text-gray-800 transition-colors">
-              <span class="font-bold">C</span> - Común
+              <span class="font-bold">C</span> - Clásica
             </button>
             <button
               v-if="typeSelectorCard.metal === 1"

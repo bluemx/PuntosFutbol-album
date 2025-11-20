@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import AlbumPages from './components/AlbumPages.vue'
 import AlbumNavigation from './components/AlbumNavigation.vue'
 import AlbumTopbar from './components/AlbumTopbar.vue'
@@ -40,6 +40,53 @@ const handleUserReady = () => {
   console.log('✅ User data loaded, showing album interface')
   isReady.value = true
 }
+
+// Send iframe size to parent window
+const sendSizeToParent = () => {
+  const message = {
+    type: 'iframeSize',
+    width: window.innerWidth,
+    height: window.innerHeight
+  }  
+  // Always send, even if not in iframe (for testing)
+  if (window.parent) {
+    window.parent.postMessage(message, '*')
+  }
+}
+
+// Setup resize listener and continuous monitoring
+onMounted(() => {
+  // Send initial size immediately
+  sendSizeToParent()
+  
+  // Send size after a short delay to catch any rendering changes
+  setTimeout(sendSizeToParent, 100)
+  setTimeout(sendSizeToParent, 500)
+  setTimeout(sendSizeToParent, 1000)
+  
+  // Listen for resize events
+  window.addEventListener('resize', sendSizeToParent)
+  
+  // Listen for load event
+  window.addEventListener('load', sendSizeToParent)
+  
+  // Use ResizeObserver to detect any DOM changes that affect size
+  const resizeObserver = new ResizeObserver(() => {
+    sendSizeToParent()
+  })
+  resizeObserver.observe(document.body)
+  
+  // Store observer for cleanup
+  ;(window as any)._sizeObserver = resizeObserver
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', sendSizeToParent)
+  window.removeEventListener('load', sendSizeToParent)
+  if ((window as any)._sizeObserver) {
+    ;(window as any)._sizeObserver.disconnect()
+  }
+})
 </script>
 
 <style scoped>

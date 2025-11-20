@@ -63,7 +63,7 @@ export const useUserStore = defineStore('user', () => {
     })
     
     if (match) {
-      console.log(`Card ${cardId}: found userCard with identifier ${match.identifier}, inAlbum: ${match.inAlbum}`)
+      //console.log(`Card ${cardId}: found userCard with identifier ${match.identifier}, inAlbum: ${match.inAlbum}`)
     }
     
     return ownedCards.value.some(card => {

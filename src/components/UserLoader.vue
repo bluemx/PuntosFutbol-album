@@ -1,7 +1,14 @@
 <template>
   <div class="min-h-screen flex items-center justify-center bg-blue-900 text-white">
+    <!-- Waiting for Customer ID -->
+    <div v-if="!customerIdReceived" class="text-center">
+      <div class="animate-spin rounded-full h-16 w-16 border-4 border-white border-t-transparent mx-auto mb-4"></div>
+      <h2 class="text-2xl font-bold mb-2">Esperando información...</h2>
+      <p class="text-blue-200">Conectando con el sistema...</p>
+    </div>
+
     <!-- Loading State -->
-    <div v-if="userStore.isLoading" class="text-center">
+    <div v-else-if="userStore.isLoading" class="text-center">
       <div class="animate-spin rounded-full h-16 w-16 border-4 border-white border-t-transparent mx-auto mb-4"></div>
       <h2 class="text-2xl font-bold mb-2">Cargando tu álbum...</h2>
       <p class="text-blue-200">Obteniendo tu colección de estampas...</p>
@@ -36,24 +43,11 @@
         Abrir Álbum
       </button>
     </div>
-
-    <!-- Initial State -->
-    <div v-else class="text-center">
-      <div class="text-6xl mb-4">📱</div>
-      <p class="text-blue-200 mb-6">Cargando...</p>
-      
-      <button
-        @click="loadUserData"
-        class="bg-white text-blue-900 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-      >
-        🚀 Cargando
-      </button>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useUserStore } from '../stores/user'
 import { cardsDatabase } from '../data/cards';
 
@@ -63,7 +57,8 @@ const emit = defineEmits<{
 
 const userStore = useUserStore()
 
-let customerId = '119' // Development default
+const customerIdReceived = ref(false)
+let customerId = ''
 
 const loadUserData = async () => {
   try {
@@ -83,9 +78,12 @@ const continueToAlbum = () => {
 
 // Handle postMessage from parent window
 const handleMessage = (event: MessageEvent) => {
-  if (event.data && event.data.type === 'USER_ID') {
-    customerId = event.data.userId
-    console.log('Received user ID from parent:', customerId)
+  console.log('📨 Received postMessage:', event.data)
+  
+  if (event.data && event.data.type === 'customerID') {
+    customerId = event.data.customerID
+    customerIdReceived.value = true
+    console.log('✅ Received customer ID from parent:', customerId)
     loadUserData()
   }
 }
@@ -93,9 +91,13 @@ const handleMessage = (event: MessageEvent) => {
 onMounted(() => {
   // Listen for postMessage from parent
   window.addEventListener('message', handleMessage)
+  console.log('👂 Listening for customerID postMessage from parent...')
   
-  // Auto-load with development ID
-  loadUserData()
+  // Send ready signal to parent
+  if (window.parent) {
+    window.parent.postMessage({ type: 'iframeReady' }, '*')
+    console.log('📤 Sent iframeReady message to parent')
+  }
 })
 
 onUnmounted(() => {
