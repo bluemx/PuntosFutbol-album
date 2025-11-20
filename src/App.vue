@@ -44,7 +44,7 @@ const handleUserReady = () => {
 // Send iframe size to parent window
 const sendSizeToParent = () => {
   const appElement = document.getElementById('app')
-  const height = appElement ? appElement.scrollHeight+120 : window.innerHeight
+  const height = appElement ? appElement.scrollHeight : window.innerHeight
   
   const message = {
     type: 'iframeSize',
