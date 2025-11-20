@@ -10,7 +10,7 @@
             href="https://puntosfutbol.com/" 
             target="_blank"
             rel="noopener noreferrer"
-            class="btn shrink-0 btn-outline text-blue-900">
+            class="btn shrink-0 btn-outline bg-linear-to-r from-green-700 to-teal-800 hover:text-amber-300">
             <Icon icon="mdi:cash" class="w-4 h-4" />
             <span >Comprar sobres</span>
           </a>

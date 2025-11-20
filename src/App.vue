@@ -49,7 +49,7 @@ const sendSizeToParent = () => {
   const message = {
     type: 'iframeSize',
     width: window.innerWidth,
-    height: height
+    height: height + 120
   }
   console.log('📏 Sending size to parent:', message)
   
