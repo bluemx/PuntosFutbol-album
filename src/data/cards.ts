@@ -464,11 +464,19 @@ export const cardsDatabase: Card[] =
 {"acRegId":452,"identifier":452,"category":8,"disposition":"Vertical4","desc":"Copa final","metal":null,"anim":null,"has3d":""},
 {"acRegId":453,"identifier":453,"category":8,"disposition":"Vertical4","desc":"Copa final","metal":null,"anim":null,"has3d":""},
 {"acRegId":454,"identifier":454,"category":8,"disposition":"Vertical4","desc":"Copa final","metal":null,"anim":null,"has3d":""},
-{"acRegId":455,"identifier":455,"category":12,"disposition":"Vertical","desc":"Telcel","metal":null,"anim":1,"has3d":""},
-{"acRegId":456,"identifier":456,"category":12,"disposition":"Vertical","desc":"Librerias Gandhi","metal":null,"anim":1,"has3d":""},
-{"acRegId":457,"identifier":457,"category":12,"disposition":"Vertical","desc":"Dportenis","metal":null,"anim":1,"has3d":""},
-{"acRegId":458,"identifier":458,"category":12,"disposition":"Vertical","desc":"Waldo's","metal":null,"anim":1,"has3d":""},
-{"acRegId":459,"identifier":459,"category":12,"disposition":"Vertical","desc":"Modelorama","metal":null,"anim":1,"has3d":""},
-{"acRegId":460,"identifier":460,"category":12,"disposition":"Vertical","desc":"American Express","metal":null,"anim":1,"has3d":""},
-{"acRegId":461,"identifier":461,"category":12,"disposition":"Vertical","desc":"DHL","metal":null,"anim":1,"has3d":""},
-{"acRegId":462,"identifier":462,"category":12,"disposition":"Vertical","desc":"Barcel","metal":null,"anim":1,"has3d":""}];
+
+
+{"acRegId":455,"identifier":455,"category":12,"disposition":"Vertical","desc":"American Express","metal":null,"anim":1,"has3d":""},
+{"acRegId":456,"identifier":456,"category":12,"disposition":"Vertical","desc":"Barcel","metal":null,"anim":1,"has3d":""},
+{"acRegId":457,"identifier":457,"category":12,"disposition":"Vertical","desc":"Bodegas Alianza","metal":null,"anim":1,"has3d":""},
+{"acRegId":458,"identifier":458,"category":12,"disposition":"Vertical","desc":"Casa Ley","metal":null,"anim":1,"has3d":""},
+{"acRegId":459,"identifier":459,"category":12,"disposition":"Vertical","desc":"DHL","metal":null,"anim":1,"has3d":""},
+{"acRegId":460,"identifier":460,"category":12,"disposition":"Vertical","desc":"Dportenis","metal":null,"anim":1,"has3d":""},
+{"acRegId":461,"identifier":461,"category":12,"disposition":"Vertical","desc":"Librerias Gandhi","metal":null,"anim":1,"has3d":""},
+{"acRegId":462,"identifier":462,"category":12,"disposition":"Vertical","desc":"Lumen","metal":null,"anim":1,"has3d":""},
+{"acRegId":463,"identifier":463,"category":12,"disposition":"Vertical","desc":"Modelorama","metal":null,"anim":1,"has3d":""},
+{"acRegId":464,"identifier":464,"category":12,"disposition":"Vertical","desc":"Telcel","metal":null,"anim":1,"has3d":""},
+{"acRegId":465,"identifier":465,"category":12,"disposition":"Vertical","desc":"Waldo's","metal":null,"anim":1,"has3d":""}
+
+
+];

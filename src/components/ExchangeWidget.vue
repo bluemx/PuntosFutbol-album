@@ -14,6 +14,12 @@
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md"
       @click="close">
       
+      <!-- Backdrop for type selector -->
+      <div 
+        v-if="showTypeSelector"
+        class="fixed inset-0 z-65"
+        @click="showTypeSelector = false"></div>
+      
       <div 
         class="bg-white rounded-lg p-6 max-w-6xl max-h-[90vh] overflow-y-auto shadow-xl w-[95vw]"
         @click.stop>
@@ -45,11 +51,11 @@
                 <div class="flex gap-4 text-sm">
                   <div>
                     <span class="font-semibold text-gray-700">Ofreces:</span>
-                    <span class="ml-1 text-blue-600">{{ exchange.stickersOffered }}</span>
+                    <span class="ml-1 text-blue-600">{{ formatStickersWithType(exchange.stickersOffered) }}</span>
                   </div>
                   <div>
                     <span class="font-semibold text-gray-700">Buscas:</span>
-                    <span class="ml-1 text-green-600">{{ exchange.stickersWanted }}</span>
+                    <span class="ml-1 text-green-600">{{ formatStickersWithType(exchange.stickersWanted) }}</span>
                   </div>
                 </div>
                 <p class="text-xs text-gray-500 mt-1">{{ formatDate(exchange.exchangeAddedDate) }}</p>
@@ -77,10 +83,10 @@
           </h3>
           <div v-if="selectedOfferIdentifiers.length > 0" class="mb-3 flex flex-wrap gap-1">
             <span 
-              v-for="identifier in selectedOfferIdentifiers" 
-              :key="identifier"
+              v-for="item in selectedOfferIdentifiers" 
+              :key="item.identifier"
               class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-sm font-bold">
-              {{ identifier }}
+              {{ item.identifier }}<span class="text-xs ml-0.5">{{ item.type }}</span>
             </span>
           </div>
           <p class="text-sm text-gray-600 mb-4">Selecciona las estampas que quieres ofrecer (estampas repetidas)</p>
@@ -187,14 +193,17 @@
             <button
               v-for="card in filteredCards"
               :key="card.identifier"
-              @click="toggleWanted(card.identifier)"
-              class="aspect-square rounded-lg flex items-center justify-center text-sm font-bold transition-all duration-200"
+              @click="toggleWanted(card, $event)"
+              class="aspect-square rounded-lg flex flex-col items-center justify-center text-sm font-bold transition-all duration-200 relative"
               :class="{
                 'bg-pfblue text-white shadow-lg scale-110': isInWanted(card.identifier),
                 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200': !isInWanted(card.identifier),
-                'opacity-50 !bg-teal-500 !text-white !alert': userStore.ownsCard(card.identifier)
+                'opacity-50 bg-teal-500! text-white! alert!': userStore.ownsCard(card.identifier)
               }">
-              {{ card.identifier }}
+              <span>{{ card.identifier }}</span>
+              <span v-if="isInWanted(card.identifier)" class="text-[0.6rem] font-normal absolute bottom-0.5 right-0.5">
+                {{ getWantedType(card.identifier) }}
+              </span>
             </button>
           </div>
           <div class="mt-4">
@@ -203,6 +212,45 @@
                 Estampas que ya tienes
             </p>
           </div>
+        </div>
+
+        <!-- Type Selector Popup -->
+        <div 
+          v-if="showTypeSelector && typeSelectorCard"
+          class="fixed z-70 bg-white rounded-lg shadow-2xl border-2 border-pfblue p-3 min-w-[180px]"
+          :style="{
+            left: typeSelectorPosition.x + 'px',
+            top: typeSelectorPosition.y + 'px',
+            transform: 'translate(-50%, -100%) translateY(-8px)'
+          }"
+          @click.stop>
+          <div class="text-xs font-semibold text-gray-600 mb-2 text-center">
+            Selecciona el tipo:
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <button
+              @click="selectWantedType('C')"
+              class="px-3 py-2 text-sm font-medium rounded-md bg-gray-100 hover:bg-gray-200 text-gray-800 transition-colors">
+              <span class="font-bold">C</span> - Común
+            </button>
+            <button
+              v-if="typeSelectorCard.metal === 1"
+              @click="selectWantedType('M')"
+              class="px-3 py-2 text-sm font-medium rounded-md bg-yellow-100 hover:bg-yellow-200 text-yellow-900 transition-colors">
+              <span class="font-bold">M</span> - Metal
+            </button>
+            <button
+              v-if="typeSelectorCard.anim === 1"
+              @click="selectWantedType('A')"
+              class="px-3 py-2 text-sm font-medium rounded-md bg-purple-100 hover:bg-purple-200 text-purple-900 transition-colors">
+              <span class="font-bold">A</span> - Animada
+            </button>
+          </div>
+          <button
+            @click="showTypeSelector = false"
+            class="mt-2 w-full px-2 py-1 text-xs text-gray-500 hover:text-gray-700">
+            Cancelar
+          </button>
         </div>
 
         <!-- Action Button -->
@@ -360,6 +408,7 @@ import { apiService, type ExchangeMatch, type CurrentExchange } from '../service
 import CardRenderer from './CardRenderer.vue'
 import { cardsDatabase, type Card } from '../data/cards'
 import { categoriesDatabase } from '../data/categories'
+import { cardsDatabase as cardsAlternatives } from '../data/cardsAlternatives'
 import type { UserCard } from '../stores/user'
 
 const userStore = useUserStore()
@@ -380,8 +429,11 @@ const sortedCategories = computed(() => {
 
 // Selection state
 const selectedOffer = ref<number[]>([])
-const selectedWanted = ref<number[]>([])
+const selectedWanted = ref<Array<{ identifier: number, type: 'C' | 'M' | 'A' }>>([])
 const exchangeMatches = ref<ExchangeMatch[]>([])
+const showTypeSelector = ref(false)
+const typeSelectorCard = ref<typeof cardsDatabase[0] | null>(null)
+const typeSelectorPosition = ref({ x: 0, y: 0 })
 
 // My exchanges state
 const myExchanges = ref<CurrentExchange[]>([])
@@ -425,9 +477,41 @@ const filteredAvailableStickers = computed(() => {
 const selectedOfferIdentifiers = computed(() => {
   return availableStickers.value
     .filter(card => selectedOffer.value.includes(card.id))
-    .map(card => card.identifier ? Number(card.identifier) : 0)
-    .sort((a, b) => a - b)
+    .map(card => {
+      const identifier = card.identifier ? Number(card.identifier) : 0
+      const cardData = cardsDatabase.find(c => c.identifier === identifier)
+      return {
+        identifier,
+        type: getCardTypeLabel(cardData)
+      }
+    })
+    .sort((a, b) => a.identifier - b.identifier)
 })
+
+// Get card type label (C = Clásico, M = Metal, A = Animado)
+// Check if the card's acRegId exists in cardsAlternatives to determine its type
+const getCardTypeLabel = (card?: typeof cardsDatabase[0]) => {
+  if (!card) return 'C'
+  
+  // Look up the card's acRegId in cardsAlternatives
+  const alternativeCard = cardsAlternatives.find(alt => alt.acRegId === card.acRegId)
+  
+  if (alternativeCard?.type === 1) return 'M' // Metal
+  if (alternativeCard?.type === 2) return 'A' // Animada
+  
+  return 'C' // Común (default)
+}
+
+// Format sticker list with type indicators
+const formatStickersWithType = (stickerList: string) => {
+  if (!stickerList) return ''
+  const identifiers = stickerList.split(',').map(s => s.trim())
+  return identifiers.map(id => {
+    const cardData = cardsDatabase.find(c => c.identifier === Number(id))
+    const typeLabel = getCardTypeLabel(cardData)
+    return `${id}${typeLabel}`
+  }).join(', ')
+}
 
 // Check if a card with the same identifier is already in album
 const hasCardInAlbum = (identifier: string | number | null) => {
@@ -549,14 +633,9 @@ async function closeSuccess() {
   openExchange()
 }
 
-async function closeNoMatches() {
+function closeNoMatches() {
   showNoMatchesModal.value = false
-  // Close main modal
-  showModal.value = false
-  // Wait a bit for animation
-  await new Promise(resolve => setTimeout(resolve, 300))
-  // Reopen with refreshed data
-  openExchange()
+  // Keep main modal open so user can modify the exchange request
 }
 
 function closeCancelSuccess() {
@@ -568,7 +647,11 @@ function isInOffer(cardId: number): boolean {
 }
 
 function isInWanted(cardId: number): boolean {
-  return selectedWanted.value.includes(cardId)
+  return selectedWanted.value.some(item => item.identifier === cardId)
+}
+
+function getWantedType(cardId: number): 'C' | 'M' | 'A' | null {
+  return selectedWanted.value.find(item => item.identifier === cardId)?.type || null
 }
 
 function toggleOffer(card: UserCard) {
@@ -580,13 +663,42 @@ function toggleOffer(card: UserCard) {
   }
 }
 
-function toggleWanted(cardId: number) {
-  const index = selectedWanted.value.indexOf(cardId)
-  if (index === -1) {
-    selectedWanted.value.push(cardId)
+function toggleWanted(card: typeof cardsDatabase[0], event: MouseEvent) {
+  const existingIndex = selectedWanted.value.findIndex(item => item.identifier === card.identifier)
+  
+  if (existingIndex === -1) {
+    // Not selected yet - check if card has alternatives
+    const hasAlternatives = card.metal === 1 || card.anim === 1
+    
+    if (hasAlternatives) {
+      // Show type selector
+      typeSelectorCard.value = card
+      const rect = (event.target as HTMLElement).getBoundingClientRect()
+      typeSelectorPosition.value = {
+        x: rect.left + rect.width / 2,
+        y: rect.top
+      }
+      showTypeSelector.value = true
+    } else {
+      // No alternatives, just add as Común
+      selectedWanted.value.push({ identifier: card.identifier, type: 'C' })
+    }
   } else {
-    selectedWanted.value.splice(index, 1)
+    // Already selected - remove it
+    selectedWanted.value.splice(existingIndex, 1)
   }
+}
+
+function selectWantedType(type: 'C' | 'M' | 'A') {
+  if (!typeSelectorCard.value) return
+  
+  selectedWanted.value.push({
+    identifier: typeSelectorCard.value.identifier,
+    type
+  })
+  
+  showTypeSelector.value = false
+  typeSelectorCard.value = null
 }
 
 async function startExchange() {
@@ -604,10 +716,24 @@ async function startExchange() {
         ACRegId: card.acRegId
       }))
     
-    // Build wanted array with just ACRegId (using card.id as the identifier)
-    const wantedItems = selectedWanted.value.map(cardId => ({
-      ACRegId: cardId
-    }))
+    // Build wanted array with ACRegId based on identifier and type
+    const wantedItems = selectedWanted.value.map(item => {
+      let acRegId = item.identifier
+      
+      // If type is Metal or Animada, find the corresponding acRegId
+      if (item.type === 'M' || item.type === 'A') {
+        const alternativeCard = cardsAlternatives.find(
+          alt => alt.identifier === item.identifier && 
+                 ((item.type === 'M' && alt.type === 1) || 
+                  (item.type === 'A' && alt.type === 2))
+        )
+        if (alternativeCard) {
+          acRegId = alternativeCard.acRegId
+        }
+      }
+      
+      return { ACRegId: acRegId }
+    })
     
     const response = await apiService.tryExchange(
       Number(userStore.customerId),

@@ -5,7 +5,8 @@
 
     <div id="album" ref="albumRef" class="w-full">
         <div class="page page-cover page-cover-top" data-density="hard">
-            <div class="page-content h-full card rounded-l-none" :style="bgStyle(coverImage)">
+            <div class="page-content h-full card rounded-l-none relative" :style="bgStyle(coverImage)">
+                <PageArrows :this-page="-1" :is-first-content-page="false" />
                 <img src="/logow-anim.svg" class="w-60 mx-auto animate-pulse" />
             </div>
         </div>
@@ -14,6 +15,8 @@
             <div class="page-content h-full bg-pfblue flex flex-col justify-evenly items-center card rounded-r-none"  >
                 <div class="absolute inset-0  z-0 bg-linear-to-b from-blue-900 to-black/0" ></div>
                 <div class="absolute inset-0  opacity-50 mix-blend-multiply" :style="bgStyle(coverBackImage)"></div>
+
+                <PageArrows :this-page="0" :is-first-content-page="false" />
 
                 <div class="max-w-md mx-auto card bg-white/20 backdrop-blur-xl px-8 relative z-10">
                     <div class="text-center font-bold text-2xl mb-4 text-white">Índice</div>
@@ -28,7 +31,8 @@
         <!-- PAGES # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # -->
         
         <div class="page page-cover page-cover-bottom"  data-density="hard">
-            <div class="page-content h-full bg-amber-600 bg-cover bg-center card rounded-l-none"  :style="bgStyle(backImage)" >
+            <div class="page-content h-full bg-amber-600 bg-cover bg-center card rounded-l-none relative"  :style="bgStyle(backImage)" >
+                <PageArrows :this-page="albumStore.totalPages + 1" :is-first-content-page="false" />
             </div>
         </div>
     </div>
@@ -42,6 +46,7 @@ import { useAlbumStore } from '../stores/album';
 import Page from './Page.vue';
 import UserProfile from './UserProfile.vue';
 import AlbumIndex from './AlbumIndex.vue';
+import PageArrows from './PageArrows.vue';
 
 // Use proper asset paths for public folder assets
 const coverImage = `${import.meta.env.BASE_URL}pages/cover.webp`;
