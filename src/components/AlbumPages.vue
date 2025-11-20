@@ -37,7 +37,7 @@
 <script setup lang="ts">
 // @ts-ignore - pageflip utility doesn't have types
 import { startFlip as startFlipUtil, goToPageFromHash as goToPageFromHashUtil } from '../utils/pageflip.js';
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, provide } from 'vue';
 import { useAlbumStore } from '../stores/album';
 import Page from './Page.vue';
 import UserProfile from './UserProfile.vue';
@@ -66,6 +66,9 @@ function goToPageFromHash() {
         goToPageFromHashUtil(pageFlipInstance.value);
     }
 }
+
+// Provide the toPage function to child components
+provide('toPage', toPage);
 
 // Expose the function to parent components
 defineExpose({

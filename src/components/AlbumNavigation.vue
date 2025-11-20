@@ -54,7 +54,7 @@ watch(() => albumStore.currentPage, (newPage) => {
       :disabled="!albumStore.canGoPrevious"
       class="btn"
     >
-    <Icon icon="ph:arrow-fat-line-left-duotone" />
+    <Icon icon="mdi:arrow-left-thick" />
     </button>
     
     <div class="flex-1 flex flex-col items-center gap-1">
@@ -81,7 +81,7 @@ watch(() => albumStore.currentPage, (newPage) => {
       :disabled="!albumStore.canGoNext"
       class="btn"
     >
-      <Icon icon="ph:arrow-fat-line-right-duotone" />
+      <Icon icon="mdi:arrow-right-thick" />
     </button>
   </div>
 </template>
