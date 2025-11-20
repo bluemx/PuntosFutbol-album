@@ -76,6 +76,22 @@ const continueToAlbum = () => {
   emit('ready')
 }
 
+// Check for customer ID in URL hash
+const checkUrlForCustomerId = () => {
+  const hash = window.location.hash
+  if (hash) {
+    const match = hash.match(/ci=([^&]+)/)
+    if (match && match[1]) {
+      customerId = match[1]
+      customerIdReceived.value = true
+      console.log('✅ Customer ID found in URL:', customerId)
+      loadUserData()
+      return true
+    }
+  }
+  return false
+}
+
 // Handle postMessage from parent window
 const handleMessage = (event: MessageEvent) => {
   console.log('📨 Received postMessage:', event.data)
@@ -89,14 +105,19 @@ const handleMessage = (event: MessageEvent) => {
 }
 
 onMounted(() => {
-  // Listen for postMessage from parent
-  window.addEventListener('message', handleMessage)
-  console.log('👂 Listening for customerID postMessage from parent...')
+  // First, check URL hash for customer ID
+  const foundInUrl = checkUrlForCustomerId()
   
-  // Send ready signal to parent
-  if (window.parent) {
-    window.parent.postMessage({ type: 'iframeReady' }, '*')
-    console.log('📤 Sent iframeReady message to parent')
+  if (!foundInUrl) {
+    // If not in URL, listen for postMessage from parent
+    window.addEventListener('message', handleMessage)
+    console.log('👂 Listening for customerID postMessage from parent...')
+    
+    // Send ready signal to parent
+    if (window.parent) {
+      window.parent.postMessage({ type: 'iframeReady' }, '*')
+      console.log('📤 Sent iframeReady message to parent')
+    }
   }
 })
 

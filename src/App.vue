@@ -43,11 +43,16 @@ const handleUserReady = () => {
 
 // Send iframe size to parent window
 const sendSizeToParent = () => {
+  const appElement = document.getElementById('app')
+  const height = appElement ? appElement.scrollHeight : window.innerHeight
+  
   const message = {
     type: 'iframeSize',
     width: window.innerWidth,
-    height: window.innerHeight
-  }  
+    height: height
+  }
+  console.log('📏 Sending size to parent:', message)
+  
   // Always send, even if not in iframe (for testing)
   if (window.parent) {
     window.parent.postMessage(message, '*')
