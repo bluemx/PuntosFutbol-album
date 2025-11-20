@@ -123,7 +123,7 @@
               >
                 <img 
                   :src="normalPackImg" 
-                  alt="Sobre Común"
+                  alt="Sobre Clásica"
                   class="w-40 h-56 object-contain drop-shadow-2xl hover:scale-110 transition-transform"
                 />
               </div>
@@ -358,10 +358,10 @@ function getCardDescription(card: UserCard): string {
 function getCardType(card: UserCard): string {
   const identifier = getCardIdentifier(card.resource)
   const cardData = cardsDatabase.find(c => c.identifier === identifier)
-  if (!cardData) return 'Común'
+  if (!cardData) return 'Clásica'
   if (cardData.metal) return 'Metal'
   if (cardData.anim) return 'Animada'
-  return 'Común'
+  return 'Clásica'
 }
 
 // Open card detail modal

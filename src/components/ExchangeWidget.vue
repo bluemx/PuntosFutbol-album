@@ -75,6 +75,14 @@
             <Icon icon="mdi:hand-coin" class="w-6 h-6" />
             Tu Oferta ({{ selectedOffer.length }} seleccionados)
           </h3>
+          <div v-if="selectedOfferIdentifiers.length > 0" class="mb-3 flex flex-wrap gap-1">
+            <span 
+              v-for="identifier in selectedOfferIdentifiers" 
+              :key="identifier"
+              class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-sm font-bold">
+              {{ identifier }}
+            </span>
+          </div>
           <p class="text-sm text-gray-600 mb-4">Selecciona las estampas que quieres ofrecer (estampas repetidas)</p>
           
           <!-- Filter Controls -->
@@ -413,6 +421,14 @@ const filteredAvailableStickers = computed(() => {
   })
 })
 
+// Get identifiers of selected offer cards
+const selectedOfferIdentifiers = computed(() => {
+  return availableStickers.value
+    .filter(card => selectedOffer.value.includes(card.id))
+    .map(card => card.identifier ? Number(card.identifier) : 0)
+    .sort((a, b) => a - b)
+})
+
 // Check if a card with the same identifier is already in album
 const hasCardInAlbum = (identifier: string | number | null) => {
   if (identifier === null) return false
@@ -439,12 +455,12 @@ const getCategoryName = (identifier: string | number | null) => {
 
 // Get card type (Normal, Metal, or Animada)
 const getCardType = (identifier: string | number | null) => {
-  if (identifier === null) return 'Común'
+  if (identifier === null) return 'Clásica'
   const cardData = cardsDatabase.find(c => c.identifier === Number(identifier))
-  if (!cardData) return 'Común'
+  if (!cardData) return 'Clásica'
   if (cardData.metal) return 'Metal'
   if (cardData.anim) return 'Animada'
-  return 'Común'
+  return 'Clásica'
 }
 
 // Filter cards for wanted section
@@ -523,13 +539,24 @@ function close() {
   showModal.value = false
 }
 
-function closeSuccess() {
+async function closeSuccess() {
   showSuccessModal.value = false
-  close()
+  // Close main modal
+  showModal.value = false
+  // Wait a bit for animation
+  await new Promise(resolve => setTimeout(resolve, 300))
+  // Reopen with refreshed data
+  openExchange()
 }
 
-function closeNoMatches() {
+async function closeNoMatches() {
   showNoMatchesModal.value = false
+  // Close main modal
+  showModal.value = false
+  // Wait a bit for animation
+  await new Promise(resolve => setTimeout(resolve, 300))
+  // Reopen with refreshed data
+  openExchange()
 }
 
 function closeCancelSuccess() {

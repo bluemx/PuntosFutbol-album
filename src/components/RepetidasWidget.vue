@@ -264,14 +264,14 @@ const getCategoryName = (identifier: string | number | null) => {
   return category?.name || ''
 }
 
-// Get card type (Común, Metal, or Animada)
+// Get card type (Clásica, Metal, or Animada)
 const getCardType = (identifier: string | number | null) => {
-  if (identifier === null) return 'Común'
+  if (identifier === null) return 'Clásica'
   const cardData = cardsDatabase.find(c => c.identifier === Number(identifier))
-  if (!cardData) return 'Común'
+  if (!cardData) return 'Clásica'
   if (cardData.metal) return 'Metal'
   if (cardData.anim) return 'Animada'
-  return 'Común'
+  return 'Clásica'
 }
 
 // Open card detail modal

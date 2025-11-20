@@ -36,7 +36,7 @@
             <input 
               v-model="searchQuery"
               type="text"
-              placeholder="Buscar por alias..."
+              placeholder="Buscar por Alias"
               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pfblue focus:border-transparent">
           </div>
         </div>
@@ -380,12 +380,12 @@ const getCategoryName = (identifier: string | number | null) => {
 
 // Get card type (Normal, Metal, or Animada)
 const getCardType = (identifier: string | number | null) => {
-  if (identifier === null) return 'Común'
+  if (identifier === null) return 'Clásica'
   const cardData = cardsDatabase.find(c => c.identifier === Number(identifier))
-  if (!cardData) return 'Común'
+  if (!cardData) return 'Clásica'
   if (cardData.metal) return 'Metal'
   if (cardData.anim) return 'Animada'
-  return 'Común'
+  return 'Clásica'
 }
 
 // Get initials from nickname
