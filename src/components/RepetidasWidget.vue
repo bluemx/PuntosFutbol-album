@@ -96,7 +96,7 @@
                 <div class="text-center text-xs text-gray-600 max-w-[180px]">
                   <div class="font-semibold truncate">{{ getCardDescription(card.identifier) }}</div>
                   <div class="text-gray-500">{{ getCategoryName(card.identifier) }}</div>
-                  <div class="text-gray-400">{{ getCardType(card.identifier) }}</div>
+                  <div class="text-gray-400">{{ getCardType(card) }}</div>
                 </div>
               </div>
             </div>
@@ -188,6 +188,7 @@ import CardRenderer from './CardRenderer.vue'
 import { useNewlyOpenedCards } from '../composables/useNewlyOpenedCards'
 import { cardsDatabase } from '../data/cards'
 import { categoriesDatabase } from '../data/categories'
+import { cardsDatabase as cardsAlternatives } from '../data/cardsAlternatives'
 
 const userStore = useUserStore()
 const showModal = ref(false)
@@ -270,12 +271,15 @@ const getCategoryName = (identifier: string | number | null) => {
 }
 
 // Get card type (Clásica, Metal, or Animada)
-const getCardType = (identifier: string | number | null) => {
-  if (identifier === null) return 'Clásica'
-  const cardData = cardsDatabase.find(c => c.identifier === Number(identifier))
-  if (!cardData) return 'Clásica'
-  if (cardData.metal) return 'Metal'
-  if (cardData.anim) return 'Animada'
+const getCardType = (card: any) => {
+  if (!card || !card.acRegId) return 'Clásica'
+  
+  // Check if the card's acRegId exists in cardsAlternatives
+  const alternativeCard = cardsAlternatives.find(alt => alt.acRegId === card.acRegId)
+  
+  if (alternativeCard?.type === 1) return 'Metal'
+  if (alternativeCard?.type === 2) return 'Animada'
+  
   return 'Clásica'
 }
 

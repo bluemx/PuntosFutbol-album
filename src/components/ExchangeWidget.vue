@@ -266,7 +266,7 @@
           <button 
             @click="startExchange"
             :disabled="selectedOffer.length === 0 || selectedWanted.length === 0 || isLoading"
-            class="btn flex-1 bg-pfblue hover:bg-pfblue/90 text-white disabled:opacity-50 disabled:cursor-not-allowed">
+            class="btn flex-1 bg-linear-to-b from-green-500 to-teal-500 hover:from-green-600 text-white disabled:opacity-50 disabled:cursor-not-allowed">
             <Icon 
               :icon="isLoading ? 'mdi:loading' : 'mdi:swap-horizontal'" 
               :class="{ 'animate-spin': isLoading }"
@@ -299,6 +299,15 @@
       <div 
         class="bg-white rounded-lg p-8 max-w-2xl shadow-xl max-h-[80vh] overflow-y-auto"
         @click.stop>
+        
+        <!-- Close Button -->
+        <div class="flex justify-end mb-2">
+          <button 
+            @click="closeSuccess"
+            class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100">
+            <Icon icon="mdi:close" class="w-6 h-6" />
+          </button>
+        </div>
         
         <!-- Success Icon -->
         <div class="flex justify-center mb-4">
@@ -353,6 +362,15 @@
         class="bg-white rounded-lg p-8 max-w-md shadow-xl"
         @click.stop>
         
+        <!-- Close Button -->
+        <div class="flex justify-end mb-2">
+          <button 
+            @click="closeNoMatches"
+            class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100">
+            <Icon icon="mdi:close" class="w-6 h-6" />
+          </button>
+        </div>
+        
         <!-- Warning Icon -->
         <div class="flex justify-center mb-4">
           <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center">
@@ -386,6 +404,15 @@
       <div 
         class="bg-white rounded-lg p-8 max-w-md shadow-xl"
         @click.stop>
+        
+        <!-- Close Button -->
+        <div class="flex justify-end mb-2">
+          <button 
+            @click="closeCancelSuccess"
+            class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100">
+            <Icon icon="mdi:close" class="w-6 h-6" />
+          </button>
+        </div>
         
         <!-- Success Icon -->
         <div class="flex justify-center mb-4">
@@ -487,7 +514,8 @@ const selectedOfferIdentifiers = computed(() => {
     .filter(card => selectedOffer.value.includes(card.id))
     .map(card => {
       const identifier = card.identifier ? Number(card.identifier) : 0
-      const cardData = cardsDatabase.find(c => c.identifier === identifier)
+      // Use acRegId to find the exact card (not just by identifier)
+      const cardData = cardsDatabase.find(c => c.acRegId === card.acRegId)
       return {
         identifier,
         type: getCardTypeLabel(cardData)

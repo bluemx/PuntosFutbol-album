@@ -9,14 +9,24 @@
       @click.stop>
       
       <!-- Header -->
-      <div class="text-center mb-6">
-        <div class="flex justify-center mb-4">
-          <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-            <Icon icon="mdi:swap-horizontal-bold" class="w-10 h-10 text-green-600" />
+      <div class="flex justify-between items-start mb-6">
+        <div class="flex-1"></div>
+        <div class="flex-1 text-center">
+          <div class="flex justify-center mb-4">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+              <Icon icon="mdi:swap-horizontal-bold" class="w-10 h-10 text-green-600" />
+            </div>
           </div>
+          <h2 class="text-2xl font-bold text-pfblue mb-2">¡Hay Intercambios Disponibles!</h2>
+          <p class="text-gray-600">Encontramos {{ matches.length }} intercambio{{ matches.length !== 1 ? 's' : '' }} que coincide{{ matches.length !== 1 ? 'n' : '' }} con tus estampas</p>
         </div>
-        <h2 class="text-2xl font-bold text-pfblue mb-2">¡Hay Intercambios Disponibles!</h2>
-        <p class="text-gray-600">Encontramos {{ matches.length }} intercambio{{ matches.length !== 1 ? 's' : '' }} que coincide{{ matches.length !== 1 ? 'n' : '' }} con tus estampas</p>
+        <div class="flex-1 flex justify-end">
+          <button 
+            @click="close"
+            class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100">
+            <Icon icon="mdi:close" class="w-6 h-6" />
+          </button>
+        </div>
       </div>
 
       <!-- Matches List -->
@@ -57,7 +67,7 @@
                   v-for="identifier in parseNumbers(match.exchange.stickersOffered)"
                   :key="identifier"
                   class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-sm font-bold flex items-center gap-1">
-                  {{ identifier }}
+                  {{ identifier }}<span class="text-xs ml-0.5">{{ getCardTypeByIdentifier(identifier) }}</span>
                   <Icon 
                     v-if="userOwnsCard(identifier)"
                     icon="mdi:star" 
@@ -77,7 +87,7 @@
                   v-for="identifier in parseNumbers(match.exchange.stickersWanted)"
                   :key="identifier"
                   class="px-2 py-1 bg-green-100 text-green-700 rounded text-sm font-bold">
-                  {{ identifier }}
+                  {{ identifier }}<span class="text-xs ml-0.5">{{ getCardTypeByIdentifier(identifier) }}</span>
                 </span>
               </div>
             </div>
@@ -87,7 +97,7 @@
           <button 
             @click="completeExchange(match.exchange.exchangeId)"
             :disabled="isCompleting === match.exchange.exchangeId"
-            class="btn w-full bg-green-500 hover:bg-green-600 text-white disabled:opacity-50 disabled:cursor-not-allowed">
+            class="btn w-full bg-linear-to-b from-green-500 to-teal-500 hover:from-green-600 text-white disabled:opacity-50 disabled:cursor-not-allowed">
             <Icon 
               :icon="isCompleting === match.exchange.exchangeId ? 'mdi:loading' : 'mdi:swap-horizontal'" 
               :class="{ 'animate-spin': isCompleting === match.exchange.exchangeId }"
@@ -152,6 +162,7 @@ import { ref, watch } from 'vue'
 import { useUserStore } from '../stores/user'
 import { Icon } from '@iconify/vue'
 import { apiService, type CurrentExchange } from '../services/api'
+import { cardsDatabase as cardsAlternatives } from '../data/cardsAlternatives'
 
 interface ExchangeMatchWithData {
   exchange: CurrentExchange
@@ -227,6 +238,23 @@ async function checkForExchanges() {
 function parseNumbers(str: string): number[] {
   if (!str) return []
   return str.split(',').map(s => Number(s.trim())).filter(n => !isNaN(n))
+}
+
+function getCardTypeByIdentifier(identifier: number): 'C' | 'M' | 'A' {
+  // Find the user's card with this identifier
+  const userCard = userStore.ownedCards.find(
+    card => Number(card.identifier) === identifier && !card.inAlbum
+  )
+  
+  if (!userCard || !userCard.acRegId) return 'C'
+  
+  // Check if it's a special type
+  const alternativeCard = cardsAlternatives.find(alt => alt.acRegId === userCard.acRegId)
+  
+  if (alternativeCard?.type === 1) return 'M'
+  if (alternativeCard?.type === 2) return 'A'
+  
+  return 'C'
 }
 
 function userOwnsCard(identifier: number): boolean {

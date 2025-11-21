@@ -9,14 +9,24 @@
       @click.stop>
       
       <!-- Header -->
-      <div class="text-center mb-6">
-        <div class="flex justify-center mb-4">
-          <div class="w-20 h-20 bg-pfblue rounded-full flex items-center justify-center">
-            <Icon icon="mdi:gift" class="w-12 h-12 text-white" />
+      <div class="flex justify-between items-start mb-6">
+        <div class="flex-1"></div>
+        <div class="flex-1 text-center">
+          <div class="flex justify-center mb-4">
+            <div class="w-20 h-20 bg-pfblue rounded-full flex items-center justify-center">
+              <Icon icon="mdi:gift" class="w-12 h-12 text-white" />
+            </div>
           </div>
+          <h2 class="text-3xl font-bold text-pfblue mb-2">¡Novedades en tu Álbum!</h2>
+          <p class="text-gray-600">Tienes {{ stickers.length }} estampa{{ stickers.length !== 1 ? 's' : '' }} nueva{{ stickers.length !== 1 ? 's' : '' }}</p>
         </div>
-        <h2 class="text-3xl font-bold text-pfblue mb-2">¡Novedades en tu Álbum!</h2>
-        <p class="text-gray-600">Tienes {{ stickers.length }} estampa{{ stickers.length !== 1 ? 's' : '' }} nueva{{ stickers.length !== 1 ? 's' : '' }}</p>
+        <div class="flex-1 flex justify-end">
+          <button 
+            @click="close"
+            class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100">
+            <Icon icon="mdi:close" class="w-6 h-6" />
+          </button>
+        </div>
       </div>
 
       <!-- Stickers Grid -->
