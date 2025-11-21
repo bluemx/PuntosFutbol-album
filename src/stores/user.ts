@@ -109,8 +109,18 @@ export const useUserStore = defineStore('user', () => {
       ownedCards.value = response.data.userCards || []
       stickersToView.value = response.data.stickersToView || []
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to load user data'
-      throw err
+      // Log the error but allow the user to continue with empty data
+      console.error('Error loading user data:', err)
+      
+      // Set customer ID so user can still access the album with empty fields
+      customerId.value = userId
+      name.value = ''
+      avatar.value = ''
+      packsToOpen.value = []
+      ownedCards.value = []
+      stickersToView.value = []
+      
+      // Don't set error.value or throw - allow user to continue to album
     } finally {
       isLoading.value = false
     }
