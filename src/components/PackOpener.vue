@@ -34,7 +34,7 @@
             <h2 class="text-2xl font-bold text-pfblue">Abrir Sobres</h2>
             <div class="flex gap-3 mt-2">
               <p v-if="userStore.defaultPacks > 0" class="text-sm text-gray-600 flex items-center gap-1">
-                <span class="font-semibold">Comunes:</span>
+                <span class="font-semibold">Clásicos:</span>
                 <span class="badge bg-gray-400 text-white">{{ userStore.defaultPacks }}</span>
               </p>
               <p v-if="userStore.goldenPacks > 0" class="text-sm text-gray-600 flex items-center gap-1">

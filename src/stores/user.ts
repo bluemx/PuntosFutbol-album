@@ -105,8 +105,8 @@ export const useUserStore = defineStore('user', () => {
         name.value = String(response.data.name)
         avatar.value = String(response.data.avatar)
         packsToOpen.value = response.data.packsToOpen || []
-      // Keep the entire UserCard structure intact
-      ownedCards.value = response.data.userCards || []
+      // Keep the entire UserCard structure intact, filter out ghost cards (id = 0)
+      ownedCards.value = (response.data.userCards || []).filter(card => card.id > 0)
       stickersToView.value = response.data.stickersToView || []
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to load user data'
@@ -170,8 +170,8 @@ export const useUserStore = defineStore('user', () => {
         throw new Error(response.errorDescription || 'Failed to open pack')
       }
       
-      // Add new cards to ownedCards
-      const newCards = response.data.userCards || []
+      // Add new cards to ownedCards, filter out ghost cards (id = 0)
+      const newCards = (response.data.userCards || []).filter(card => card.id > 0)
       ownedCards.value.push(...newCards)
       
       // Decrease pack count for the specific pack type
