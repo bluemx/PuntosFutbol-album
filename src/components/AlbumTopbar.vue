@@ -6,14 +6,12 @@
         </button>
         
         <div class="flex flex-wrap md:flex-nowrap gap-2 md:ml-auto justify-center md:justify-end">
-          <a 
-            href="https://puntosfutbol.com/" 
-            target="_blank"
-            rel="noopener noreferrer"
+          <button 
+            @click="handleBuy"
             class="btn shrink-0 btn-outline bg-linear-to-r from-green-700 to-teal-800 hover:text-amber-300">
             <Icon icon="mdi:cash" class="w-4 h-4" />
             <span >Comprar sobres</span>
-          </a>
+          </button>
           <FriendsWidget />
           <ExchangeWidget />
           <PackOpener @openRepetidas="handleOpenRepetidas" />
@@ -71,6 +69,13 @@ function handleOpenRepetidas() {
   // Open the Repetidas modal
   if (repetidasWidget.value && repetidasWidget.value.openModal) {
     repetidasWidget.value.openModal()
+  }
+}
+
+function handleBuy() {
+  if (window.parent) {
+    window.parent.postMessage({ type: 'iframeBuy' }, '*')
+    console.log('📤 Sent iframeBuy message to parent')
   }
 }
 </script>

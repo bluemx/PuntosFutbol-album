@@ -34,6 +34,11 @@
           </button>
         </div>
 
+        <p class="text-xs  alert w-fit mb-4">
+            <Icon icon="mdi:information" class="inline w-4 h-4" />
+            Las estampas que se muestran son estampas no pegadas, pueden incluir repetidas y no repetidas.
+        </p>
+
         <!-- Filter Controls -->
         <div class="mb-4 flex gap-3">
           <!-- Category Selector -->
