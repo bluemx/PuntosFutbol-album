@@ -101,6 +101,7 @@
                   :iscard="true" 
                   :identifier="getCardIdentifier(card.resource)"  
                   :base="card.resource"
+                  :cardType="getCardTypeForRenderer(card)"
                 />
               </div>
             </div>
@@ -181,7 +182,8 @@
               <CardRenderer
                :iscard="true" 
                 :identifier="getCardIdentifier(card.resource)"  
-                :base="card.resource" 
+                :base="card.resource"
+                :cardType="getCardTypeForRenderer(card)"
                 ></CardRenderer>
 
               <!-- New Card Badge -->
@@ -261,6 +263,7 @@
             :iscard="true" 
             :identifier="getCardIdentifier(selectedCard.resource)"  
             :base="selectedCard.resource"
+            :cardType="getCardTypeForRenderer(selectedCard)"
           />
         </div>
 
@@ -282,6 +285,7 @@ import CardRenderer from './CardRenderer.vue'
 import type { UserCard } from '../stores/user'
 import { useNewlyOpenedCards } from '../composables/useNewlyOpenedCards'
 import { cardsDatabase } from '../data/cards'
+import { cardsDatabase as cardsAlternatives } from '../data/cardsAlternatives'
 import normalPackImg from '../assets/pack/normal.webp'
 import goldenPackImg from '../assets/pack/golden.webp'
 import normalBurstSvg from '../assets/pack/normal-burst.svg'
@@ -345,6 +349,15 @@ function selectPack(type: number, index: number) {
 function getCardIdentifier(resourceUrl: string): number {
   const match = resourceUrl.match(/(\d+)\.webp$/)
   return match && match[1] ? parseInt(match[1]) : 0
+}
+
+// Get card type for CardRenderer component
+const getCardTypeForRenderer = (card: any): 'normal' | 'metal' | 'animated' => {
+  if (!card || !card.acRegId) return 'normal'
+  const alternativeCard = cardsAlternatives.find(alt => alt.acRegId === card.acRegId)
+  if (alternativeCard?.type === 1) return 'metal'
+  if (alternativeCard?.type === 2) return 'animated'
+  return 'normal'
 }
 
 // Get card description from database

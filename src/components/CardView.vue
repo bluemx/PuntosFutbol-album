@@ -19,7 +19,8 @@
       :shouldRotate="shouldRotate"
       v-if="ownedCard" 
       :base="ownedCard.resource"
-      :disposition="cardDisposition" 
+      :disposition="cardDisposition"
+      :cardType="cardType"
     />
 
     <!-- Card Description -->
@@ -87,6 +88,7 @@ import ModelViewer3D from './ModelViewer3D.vue'
 import { useUserStore } from '../stores/user'
 import { Icon } from '@iconify/vue'
 import { cardsDatabase } from '../data/cards'
+import { cardsDatabase as cardsAlternatives } from '../data/cardsAlternatives'
 
 interface Props {
   cardId: number
@@ -122,6 +124,14 @@ const cardHas3D = computed(() => {
 const cardDescription = computed(() => {
   const cardData = cardsDatabase.find(card => card.identifier === props.cardId)
   return cardData?.desc || ''
+})
+
+const cardType = computed<'normal' | 'metal' | 'animated'>(() => {
+  if (!ownedCard.value?.acRegId) return 'normal'
+  const alternativeCard = cardsAlternatives.find(alt => alt.acRegId === ownedCard.value?.acRegId)
+  if (alternativeCard?.type === 1) return 'metal'
+  if (alternativeCard?.type === 2) return 'animated'
+  return 'normal'
 })
 
 function calculateModalPosition() {

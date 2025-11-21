@@ -181,7 +181,8 @@
                   <CardRenderer
                     :iscard="true" 
                     :identifier="card.identifier ? Number(card.identifier) : 0"  
-                    :base="card.resource" 
+                    :base="card.resource"
+                    :cardType="getCardTypeForRenderer(card)"
                   />
 
                   <!-- Selection Indicator -->
@@ -283,9 +284,20 @@ import { Icon } from '@iconify/vue'
 import { apiService, type Friend } from '../services/api'
 import CardRenderer from './CardRenderer.vue'
 import { cardsDatabase } from '../data/cards'
+import { cardsDatabase as cardsAlternatives } from '../data/cardsAlternatives'
 import { categoriesDatabase } from '../data/categories'
 
 const userStore = useUserStore()
+
+// Get card type for CardRenderer component
+const getCardTypeForRenderer = (card: any): 'normal' | 'metal' | 'animated' => {
+  if (!card || !card.acRegId) return 'normal'
+  const alternativeCard = cardsAlternatives.find(alt => alt.acRegId === card.acRegId)
+  if (alternativeCard?.type === 1) return 'metal'
+  if (alternativeCard?.type === 2) return 'animated'
+  return 'normal'
+}
+
 const showModal = ref(false)
 const friends = ref<Friend[]>([])
 const isLoading = ref(false)

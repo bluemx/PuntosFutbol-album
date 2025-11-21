@@ -19,18 +19,25 @@
           :src="backCover" 
           alt="Loading..." 
           class="absolute top-0 left-0 w-full h-full object-cover z-0 transition-opacity duration-300" 
+          loading="lazy"
         />
         
         <!-- Base content (video or image) - using template instead of v-html -->
         <div class="z-0 transition-opacity duration-300" :class="{ 'opacity-0': !imageLoaded }">
-          <img 
-            v-if="isImageContent" 
-            :src="props.base" 
-            alt="Base Image" 
-            class="absolute top-0 left-0 w-full h-full object-cover"
-            @load="handleImageLoaded"
-            @error="handleImageLoaded"
-          />
+          <template v-if="isImageContent">
+             <!-- Metal overlay effect -->
+            <MetalOverlay v-if="isMetal" :src="props.base" />
+            <img
+              :src="props.base" 
+              alt="Base Image" 
+              class="absolute top-0 left-0 w-full h-full object-cover"
+              @load="handleImageLoaded"
+              @error="handleImageLoaded"
+              loading="lazy"
+            />
+           
+          </template>
+
           <video 
             v-else-if="isVideoContent"
             autoplay loop muted playsinline 
@@ -51,27 +58,30 @@
           class="overlay-image"
           :src="overlayImg"
           alt="Overlay"
+          loading="lazy"
         />
         <img
           v-if="overlayImg"
           class="overlay-image2"
           :src="overlayImg"
           alt="Overlay"
+          loading="lazy"
         />
 
         <!-- frame when isCard -->
         <div v-if="iscard" class="relative z-20 w-full h-full ">
             
-
-            <img :src="borderTop" class="cardRenderer-borders absolute left-0 top-0 w-full">
-            <img :src="borderBottom" class="cardRenderer-borders absolute left-0 bottom-0 w-full">
-            <img :src="pfIcon" class="absolute top-1 right-1 aspect-square w-1/5" />
+          
+            <img :src="borderTop" class="cardRenderer-borders absolute left-0 top-0 w-full" loading="lazy" v-if="!isMetal">
+            <img :src="borderBottom" class="cardRenderer-borders absolute left-0 bottom-0 w-full" loading="lazy" v-if="!isMetal">
             
+            <img :src="pfIcon" class="absolute top-1 right-1 aspect-square w-1/5" loading="lazy"/>
             <IdentifierBadge 
               v-if="identifier" 
               :identifier="identifier" 
               class="absolute left-1 bottom-1" 
             />
+            
 
         </div>
       </div>
@@ -93,13 +103,10 @@ import borderTop from '../assets/cards/borderT.svg';
 import borderBottom from '../assets/cards/borderB.svg';
 import pfIcon from '../assets/cards/pficon.svg';
 import IdentifierBadge from './IdentifierBadge.vue';
+import MetalOverlay from './MetalOverlay.vue';
 
 const imageLoaded = ref(false)
 const cardElement = ref<HTMLElement>()
-
-
-
-
 
 interface Props {
   iscard: boolean;
@@ -108,19 +115,22 @@ interface Props {
   identifier?: number;
   shouldRotate?: boolean;
   disposition?: string;
+  cardType?: 'normal' | 'metal' | 'animated';
 }
+
+const props = defineProps<Props>();
 
 const ifCardClasses = computed(() => {
   return props.iscard ? ' overflow-hidden  ' : '';
 });
 
-
+const isMetal = computed(() => {
+  return props.cardType === 'metal'
+})
 
 const overlayImg = computed(() => {
   return props.overlay ? props.overlay : defaultOverlay;
 });
-
-const props = defineProps<Props>();
 
 // Determine orientation from disposition prop
 const orientation = computed<'vertical' | 'horizontal'>(() => {

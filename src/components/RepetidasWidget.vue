@@ -78,7 +78,8 @@
                   <CardRenderer
                     :iscard="true" 
                     :identifier="card.identifier ? Number(card.identifier) : 0"  
-                    :base="card.resource" 
+                    :base="card.resource"
+                    :cardType="getCardTypeForRenderer(card)"
                   />
 
                   <!-- New Card Star Indicator -->
@@ -136,7 +137,8 @@
           <CardRenderer
             :iscard="true" 
             :identifier="selectedCard.identifier ? Number(selectedCard.identifier) : 0"  
-            :base="selectedCard.resource" 
+            :base="selectedCard.resource"
+            :cardType="getCardTypeForRenderer(selectedCard)"
           />
         </div>
 
@@ -281,6 +283,15 @@ const getCardType = (card: any) => {
   if (alternativeCard?.type === 2) return 'Animada'
   
   return 'Clásica'
+}
+
+// Get card type for CardRenderer prop
+const getCardTypeForRenderer = (card: any): 'normal' | 'metal' | 'animated' => {
+  if (!card || !card.acRegId) return 'normal'
+  const alternativeCard = cardsAlternatives.find(alt => alt.acRegId === card.acRegId)
+  if (alternativeCard?.type === 1) return 'metal'
+  if (alternativeCard?.type === 2) return 'animated'
+  return 'normal'
 }
 
 // Open card detail modal

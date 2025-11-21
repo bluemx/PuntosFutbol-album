@@ -151,6 +151,7 @@
                   :iscard="true"
                   :identifier="card.identifier ? Number(card.identifier) : 0"
                   :base="card.resource"
+                  :cardType="getCardTypeForRenderer(card)"
                 />
                 
                 <!-- Selection Indicator -->
@@ -447,6 +448,16 @@ import { cardsDatabase as cardsAlternatives } from '../data/cardsAlternatives'
 import type { UserCard } from '../stores/user'
 
 const userStore = useUserStore()
+
+// Get card type for CardRenderer component
+const getCardTypeForRenderer = (card: any): 'normal' | 'metal' | 'animated' => {
+  if (!card || !card.acRegId) return 'normal'
+  const alternativeCard = cardsAlternatives.find(alt => alt.acRegId === card.acRegId)
+  if (alternativeCard?.type === 1) return 'metal'
+  if (alternativeCard?.type === 2) return 'animated'
+  return 'normal'
+}
+
 const showModal = ref(false)
 const showSuccessModal = ref(false)
 const showNoMatchesModal = ref(false)
