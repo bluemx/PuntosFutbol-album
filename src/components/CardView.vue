@@ -52,7 +52,7 @@
     </div>
       <!-- 3D Button -->
       <button 
-        v-if="cardHas3D"
+        v-if="cardHas3D && false"
         @click.stop="open3DModel" 
         class="btn btn-primary"
         title="Ver modelo 3D">

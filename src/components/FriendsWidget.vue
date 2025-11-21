@@ -111,7 +111,7 @@
           <div class="text-gray-400 mb-4">
             <Icon icon="mdi:account-group-outline" class="w-16 h-16 mx-auto" />
           </div>
-          <p class="text-gray-600">No tienes amigos agregados</p>
+          <p class="text-gray-600">No tienes amigos añadidos aún</p>
         </div>
       </div>
     </div>
@@ -425,6 +425,10 @@ async function loadFriends() {
     const response = await apiService.getFriends(userStore.customerId)
     if (response.success) {
       friends.value = response.data
+    } else if (response.errorCode === -1 || response.data === null) {
+      // User has no friends added yet
+      friends.value = []
+      error.value = null
     } else {
       error.value = response.errorDescription || 'Error al cargar amigos'
     }
