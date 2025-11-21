@@ -1,5 +1,6 @@
 // API service for all album-related requests
-const API_BASE_URL = 'https://www.puntosfutbol.com/apialbum/api'
+//const API_BASE_URL = 'https://www.puntosfutbol.com/apialbum/api'
+const API_BASE_URL = 'https://album.puntosfutbol.com/gateway/api'
 const API_KEY = 'vimSfZ8FCAB7U2ng6cG7YvVQDeIht'
 
 // Generic API envelope
