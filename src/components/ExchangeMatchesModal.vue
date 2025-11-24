@@ -97,7 +97,7 @@
           <button 
             @click="completeExchange(match.exchange.exchangeId)"
             :disabled="isCompleting === match.exchange.exchangeId"
-            class="btn w-full bg-linear-to-b from-green-500 to-teal-500 hover:from-green-600 text-white disabled:opacity-50 disabled:cursor-not-allowed">
+            class="btn w-full bg-linear-to-r from-green-700 to-teal-800 hover:text-amber-300 text-white disabled:opacity-50 disabled:cursor-not-allowed">
             <Icon 
               :icon="isCompleting === match.exchange.exchangeId ? 'mdi:loading' : 'mdi:swap-horizontal'" 
               :class="{ 'animate-spin': isCompleting === match.exchange.exchangeId }"

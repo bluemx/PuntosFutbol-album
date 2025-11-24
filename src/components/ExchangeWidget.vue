@@ -36,10 +36,22 @@
 
         <!-- My Exchanges Section -->
         <div v-if="myExchanges.length > 0" class="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <h3 class="text-lg font-bold text-pfblue mb-3 flex items-center gap-2">
-            <Icon icon="mdi:clipboard-list" class="w-5 h-5" />
-            Mis Intercambios Activos ({{ myExchanges.length }})
-          </h3>
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="text-lg font-bold text-pfblue flex items-center gap-2">
+              <Icon icon="mdi:clipboard-list" class="w-5 h-5" />
+              Mis Intercambios Activos ({{ myExchanges.length }})
+            </h3>
+            <button 
+              @click="refreshExchanges"
+              :disabled="isRefreshing"
+              class="btn btn-sm bg-pfblue hover:bg-pfblue/90 text-white disabled:opacity-50 disabled:cursor-not-allowed">
+              <Icon 
+                :icon="isRefreshing ? 'mdi:loading' : 'mdi:refresh'" 
+                :class="{ 'animate-spin': isRefreshing }"
+                class="w-4 h-4 mr-1" />
+              {{ isRefreshing ? 'Actualizando...' : 'Actualizar' }}
+            </button>
+          </div>
           
           <div class="space-y-3">
             <div 
@@ -484,6 +496,7 @@ const typeSelectorPosition = ref({ x: 0, y: 0 })
 // My exchanges state
 const myExchanges = ref<CurrentExchange[]>([])
 const isCancelling = ref<number | null>(null)
+const isRefreshing = ref(false)
 
 // Available stickers for offer (not in album)
 const availableStickers = computed(() => {
@@ -626,6 +639,64 @@ async function loadMyExchanges() {
     }
   } catch (err) {
     console.error('Error loading my exchanges:', err)
+  }
+}
+
+async function refreshExchanges() {
+  if (!userStore.customerId || isRefreshing.value) return
+  
+  isRefreshing.value = true
+  
+  // Hide active exchanges during refresh
+  const previousExchanges = [...myExchanges.value]
+  myExchanges.value = []
+  
+  try {
+    // Reload user data (this will trigger stickersToView modal if needed)
+    await userStore.loadUserData(userStore.customerId)
+    
+    // Reload exchanges list from API
+    const response = await apiService.getCurrentExchanges(userStore.customerId)
+    if (response.success && response.data) {
+      // Update my exchanges with fresh data
+      myExchanges.value = response.data.filter(
+        ex => ex.customerIdOffers === Number(userStore.customerId)
+      )
+      
+      // Filter exchanges from other users for match checking
+      const otherUsersExchanges = response.data.filter(
+        ex => ex.customerIdOffers !== Number(userStore.customerId)
+      )
+      
+      // Count matches
+      let matchCount = 0
+      for (const exchange of otherUsersExchanges) {
+        const wantedIdentifiers = exchange.stickersWanted.split(',').map(s => Number(s.trim()))
+        const hasAllWanted = wantedIdentifiers.every(identifier => 
+          userStore.ownedCards.some(
+            card => !card.inAlbum && Number(card.identifier) === identifier
+          )
+        )
+        if (hasAllWanted) {
+          matchCount++
+        }
+      }
+      
+      // Show notification if matches found
+      if (matchCount > 0) {
+        alert(`¡Se encontraron ${matchCount} intercambio${matchCount !== 1 ? 's' : ''} disponible${matchCount !== 1 ? 's' : ''}!`)
+      }
+    } else {
+      // Restore previous exchanges on error
+      myExchanges.value = previousExchanges
+    }
+  } catch (err) {
+    console.error('Error refreshing exchanges:', err)
+    error.value = 'Error al actualizar intercambios'
+    // Restore previous exchanges on error
+    myExchanges.value = previousExchanges
+  } finally {
+    isRefreshing.value = false
   }
 }
 
