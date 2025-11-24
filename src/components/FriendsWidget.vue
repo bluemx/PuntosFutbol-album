@@ -89,12 +89,19 @@
               </div>
             </div>
 
-            <!-- Action Button -->
-            <button 
-              class="btn btn-sm btn-primary shrink-0"
-              @click.stop="openStickerSelector(friend)">
-              Enviar estampas
-            </button>
+            <!-- Action Buttons -->
+            <div class="flex flex-col gap-2 shrink-0">
+              <button 
+                class="btn btn-sm bg-linear-to-r from-green-700 to-teal-800 hover:text-amber-300 text-white"
+                @click.stop="viewFriendStickers(friend)">
+                Ver estampas
+              </button>
+              <button 
+                class="btn btn-sm btn-primary"
+                @click.stop="openStickerSelector(friend)">
+                Enviar estampas
+              </button>
+            </div>
           </div>
         </div>
 
@@ -274,6 +281,117 @@
         </button>
       </div>
     </div>
+
+    <!-- Friend Stickers Viewer Modal -->
+    <div 
+      v-if="showFriendStickersModal && viewingFriend" 
+      class="fixed inset-0 z-60 flex items-center justify-center bg-black/50 backdrop-blur-md"
+      @click="closeFriendStickersModal">
+      
+      <div 
+        class="bg-white rounded-lg p-6 w-full max-w-6xl max-h-[85vh] flex flex-col shadow-xl"
+        @click.stop>
+        
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-6">
+          <div>
+            <h2 class="text-2xl font-bold text-pfblue">Estampas de {{ viewingFriend.nickname }}</h2>
+            <p class="text-sm text-gray-600 mt-1">
+              {{ friendStickers.length }} estampa{{ friendStickers.length !== 1 ? 's' : '' }} pegada{{ friendStickers.length !== 1 ? 's' : '' }}
+            </p>
+          </div>
+          <button 
+            @click="closeFriendStickersModal"
+            class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100">
+            <Icon icon="mdi:close" class="w-6 h-6" />
+          </button>
+        </div>
+        <!-- Filter Controls -->
+        <!-- Category Selector -->
+        <!--
+        <div class="mb-4 flex gap-3">
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+            <select 
+              v-model="friendStickerCategory"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pfblue focus:border-transparent">
+              <option value="">Todas las categorías</option>
+              <option v-for="cat in sortedCategories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+            </select>
+          </div>
+        -->
+        <!-- Number Chooser -->
+         <!--
+          <div class="w-48">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Número</label>
+            <input 
+              v-model.number="friendStickerNumber"
+              type="number"
+              min="1"
+              placeholder="Número de estampa"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pfblue focus:border-transparent">
+          </div>
+        </div>
+      -->
+        <!-- Loading State -->
+        <div v-if="isLoadingFriendStickers" class="flex-1 flex items-center justify-center">
+          <div class="text-center py-12">
+            <Icon icon="mdi:loading" class="w-12 h-12 mx-auto animate-spin text-pfblue" />
+            <p class="text-gray-600 mt-4">Cargando estampas...</p>
+          </div>
+        </div>
+
+        <!-- Stickers Horizontal Scroll -->
+        <div v-else-if="filteredFriendStickers.length > 0" class="flex-1 overflow-x-auto overflow-y-hidden pb-4">
+          <div class="flex gap-4 snap-x snap-mandatory">
+            <div 
+              v-for="card in filteredFriendStickers" 
+              :key="card.id"
+              class="relative group shrink-0 snap-start w-32">
+              
+              <CardRenderer
+                :iscard="true" 
+                :identifier="card.identifier ? Number(card.identifier) : 0"  
+                :base="card.resource"
+                :cardType="getCardTypeForRenderer(card)"
+              />
+
+              <!-- Card Info -->
+              <div class="mt-2 text-center text-xs text-gray-600">
+                <div class="font-semibold truncate">{{ getCardDescription(card.identifier) }}</div>
+                <div class="text-gray-500">{{ getCategoryName(card.identifier) }}</div>
+                <div class="text-gray-400">{{ getCardType(card.identifier) }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div v-else-if="!isLoadingFriendStickers && friendStickers.length === 0" class="flex-1 flex items-center justify-center">
+          <div class="text-center py-12">
+            <Icon icon="mdi:cards-outline" class="w-16 h-16 mx-auto text-gray-400" />
+            <p class="text-gray-600 mt-4">No tiene estampas pegadas</p>
+          </div>
+        </div>
+
+        <!-- No Results State -->
+        <div v-else class="flex-1 flex items-center justify-center">
+          <div class="text-center py-12">
+            <Icon icon="mdi:filter-off" class="w-16 h-16 mx-auto text-gray-400" />
+            <p class="text-gray-600 mt-4">No se encontraron estampas con los filtros seleccionados</p>
+          </div>
+        </div>
+
+        <!-- Close Button -->
+        <div class="mt-6 pt-4 border-t">
+          <button 
+            @click="closeFriendStickersModal"
+            class="btn w-full btn-secondary">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -320,6 +438,14 @@ const sortedCategories = computed(() => {
 const showConfirmation = ref(false)
 const confirmationMessage = ref('')
 
+// Friend stickers viewer state
+const showFriendStickersModal = ref(false)
+const viewingFriend = ref<Friend | null>(null)
+const friendStickers = ref<any[]>([])
+const isLoadingFriendStickers = ref(false)
+const friendStickerCategory = ref<number | ''>('')
+const friendStickerNumber = ref<number | ''>('')
+
 // Filter friends by nickname
 const filteredFriends = computed(() => {
   if (!searchQuery.value.trim()) {
@@ -358,6 +484,29 @@ const filteredAvailableStickers = computed(() => {
     if (selectedCategory.value !== '' && selectedCategory.value !== null && selectedCategory.value !== undefined) {
       const cardData = cardsDatabase.find(c => c.identifier === Number(card.identifier))
       if (!cardData || cardData.category !== selectedCategory.value) {
+        return false
+      }
+    }
+
+    return true
+  })
+})
+
+// Filter friend stickers based on category and number
+const filteredFriendStickers = computed(() => {
+  return friendStickers.value.filter(card => {
+    // Filter by number if specified
+    if (friendStickerNumber.value !== '' && friendStickerNumber.value !== null && friendStickerNumber.value !== undefined && !isNaN(Number(friendStickerNumber.value))) {
+      const cardIdentifier = card.identifier ? Number(card.identifier) : 0
+      if (cardIdentifier !== Number(friendStickerNumber.value)) {
+        return false
+      }
+    }
+
+    // Filter by category if specified
+    if (friendStickerCategory.value !== '' && friendStickerCategory.value !== null && friendStickerCategory.value !== undefined) {
+      const cardData = cardsDatabase.find(c => c.identifier === Number(card.identifier))
+      if (!cardData || cardData.category !== friendStickerCategory.value) {
         return false
       }
     }
@@ -504,6 +653,41 @@ async function sendSelectedStickers() {
   } finally {
     isSending.value = false
   }
+}
+
+async function viewFriendStickers(friend: Friend) {
+  viewingFriend.value = friend
+  showFriendStickersModal.value = true
+  isLoadingFriendStickers.value = true
+  friendStickerCategory.value = ''
+  friendStickerNumber.value = ''
+  friendStickers.value = []
+  
+  try {
+    const response = await apiService.getCustomerStickersCustom(friend.friendCustomerID)
+    if (response.success && response.data.userCards) {
+      // Filter only cards that are in album (inAlbum: true)
+      friendStickers.value = response.data.userCards
+        .filter(card => card.id > 0 && card.inAlbum)
+        .sort((a, b) => {
+          const idA = a.identifier ? Number(a.identifier) : 0
+          const idB = b.identifier ? Number(b.identifier) : 0
+          return idA - idB
+        })
+    }
+  } catch (err) {
+    console.error('Error loading friend stickers:', err)
+  } finally {
+    isLoadingFriendStickers.value = false
+  }
+}
+
+function closeFriendStickersModal() {
+  showFriendStickersModal.value = false
+  viewingFriend.value = null
+  friendStickers.value = []
+  friendStickerCategory.value = ''
+  friendStickerNumber.value = ''
 }
 
 function close() {

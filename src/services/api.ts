@@ -300,5 +300,23 @@ export const apiService = {
       throw new Error(`API Error: ${response.status} ${response.statusText}`)
     }
     return await response.json()
+  },
+
+  async getCustomerStickersCustom(customerId: number): Promise<CustomerStickersResponse> {
+    const response = await fetch(`${API_BASE_URL}/CustomerStickersCustom`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': API_KEY
+      },
+      body: JSON.stringify({
+        Customerid: customerId
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status} ${response.statusText}`)
+    }
+    return await response.json()
   }
 }
