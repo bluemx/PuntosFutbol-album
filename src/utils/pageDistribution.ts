@@ -172,7 +172,8 @@ export function distributeCardsIntoPages(): {
             anim: card.anim,
             has3d: card.has3d,
             page: currentPageNumber,
-            positionInPage: j + 1
+            positionInPage: j + 1,
+            type: card.type
           };
           pageCards.push(cardWithPage);
           allCards.push(cardWithPage);
