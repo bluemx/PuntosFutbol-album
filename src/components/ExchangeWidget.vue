@@ -27,20 +27,7 @@
         <!-- Header -->
         <div class="flex justify-between items-center mb-6">
           <h2 class="text-2xl font-bold text-pfblue">Intercambios de Estampas</h2>
-          <button 
-            @click="close"
-            class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100">
-            <Icon icon="mdi:close" class="w-6 h-6" />
-          </button>
-        </div>
-
-        <!-- My Exchanges Section -->
-        <div v-if="myExchanges.length > 0" class="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <div class="flex justify-between items-center mb-3">
-            <h3 class="text-lg font-bold text-pfblue flex items-center gap-2">
-              <Icon icon="mdi:clipboard-list" class="w-5 h-5" />
-              Mis Intercambios Activos ({{ myExchanges.length }})
-            </h3>
+          <div class="flex items-center gap-2">
             <button 
               @click="refreshExchanges"
               :disabled="isRefreshing"
@@ -51,6 +38,21 @@
                 class="w-4 h-4 mr-1" />
               {{ isRefreshing ? 'Actualizando...' : 'Actualizar' }}
             </button>
+            <button 
+              @click="close"
+              class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100">
+              <Icon icon="mdi:close" class="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+
+        <!-- My Exchanges Section -->
+        <div v-if="myExchanges.length > 0" class="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="text-lg font-bold text-pfblue flex items-center gap-2">
+              <Icon icon="mdi:clipboard-list" class="w-5 h-5" />
+              Mis Intercambios Activos ({{ myExchanges.length }})
+            </h3>
           </div>
           
           <div class="space-y-3">

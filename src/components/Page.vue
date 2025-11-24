@@ -8,7 +8,7 @@
             <div class="absolute inset-0  opacity-100 " :style="bgStyle(getPageImageUrl())"></div>
 
             <!-- Navigation Arrows -->
-            <PageArrows :this-page="thisPage" :is-first-content-page="isFirstContentPage" />
+            <PageArrows :this-page="thisPage" :is-first-content-page="isFirstContentPage" :total-pages="albumStore.totalPages" />
 
             
             <h2 

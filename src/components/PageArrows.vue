@@ -1,28 +1,64 @@
 <template>
-  <!-- Left Page Navigation (even pages - left side of book) -->
-  <template v-if="isLeftPage && !isFirstContentPage">
-    <button 
-      @click="goToPreviousPage"
-      class="absolute top-2 left-1 z-20 text-white hover:text-pfcyan hover:scale-110 cursor-pointer">
-      <Icon icon="mdi:arrow-left-top-bold" class="w-6 h-6" />
-    </button>
-    <button 
-      @click="goToPreviousPage"
-      class="absolute bottom-2 left-1 z-20 text-white hover:text-pfcyan hover:scale-110 cursor-pointer">
-      <Icon icon="mdi:arrow-left-bottom-bold" class="w-6 h-6" />
-    </button>
-  </template>
-
-  <!-- Right Page Navigation (odd pages - right side of book) -->
-  <template v-if="!isLeftPage">
+  <!-- Desktop: Left/Right arrows based on page side -->
+  <!-- Mobile (≤580px): All 4 arrows on all pages except cover (-1, 0) and back cover (totalPages + 1) -->
+  
+  <!-- Cover page (-1): Only right arrows (desktop and mobile) -->
+  <template v-if="isCoverPage">
     <button 
       @click="goToNextPage"
-      class="absolute top-2 right-1 z-20 text-white hover:text-pfcyan hover:scale-110 cursor-pointer">
+      class="page-arrow page-arrow-top-right absolute top-2 right-1 z-20 text-white hover:text-pfcyan hover:scale-110 cursor-pointer">
       <Icon icon="mdi:arrow-right-top-bold" class="w-6 h-6" />
     </button>
     <button 
       @click="goToNextPage"
-      class="absolute bottom-2 right-1 z-20 text-white hover:text-pfcyan hover:scale-110 cursor-pointer">
+      class="page-arrow page-arrow-bottom-right absolute bottom-2 right-1 z-20 text-white hover:text-pfcyan hover:scale-110 cursor-pointer">
+      <Icon icon="mdi:arrow-right-bottom-bold" class="w-6 h-6" />
+    </button>
+  </template>
+
+  <!-- Back cover page (totalPages + 1): Only left arrows (desktop and mobile) -->
+  <template v-else-if="isBackCoverPage">
+    <button 
+      @click="goToPreviousPage"
+      class="page-arrow page-arrow-top-left absolute top-2 left-1 z-20 text-white hover:text-pfcyan hover:scale-110 cursor-pointer">
+      <Icon icon="mdi:arrow-left-top-bold" class="w-6 h-6" />
+    </button>
+    <button 
+      @click="goToPreviousPage"
+      class="page-arrow page-arrow-bottom-left absolute bottom-2 left-1 z-20 text-white hover:text-pfcyan hover:scale-110 cursor-pointer">
+      <Icon icon="mdi:arrow-left-bottom-bold" class="w-6 h-6" />
+    </button>
+  </template>
+
+  <!-- Regular pages: Desktop shows left/right based on page, Mobile shows all 4 -->
+  <template v-else>
+    <!-- Left arrows (always on mobile, only on even pages for desktop) -->
+    <button 
+      v-if="!isFirstContentPage"
+      @click="goToPreviousPage"
+      class="page-arrow page-arrow-top-left absolute top-2 left-1 z-20 text-white hover:text-pfcyan hover:scale-110 cursor-pointer"
+      :class="{ 'mobile-show-all': !isLeftPage }">
+      <Icon icon="mdi:arrow-left-top-bold" class="w-6 h-6" />
+    </button>
+    <button 
+      v-if="!isFirstContentPage"
+      @click="goToPreviousPage"
+      class="page-arrow page-arrow-bottom-left absolute bottom-2 left-1 z-20 text-white hover:text-pfcyan hover:scale-110 cursor-pointer"
+      :class="{ 'mobile-show-all': !isLeftPage }">
+      <Icon icon="mdi:arrow-left-bottom-bold" class="w-6 h-6" />
+    </button>
+
+    <!-- Right arrows (always on mobile, only on odd pages for desktop) -->
+    <button 
+      @click="goToNextPage"
+      class="page-arrow page-arrow-top-right absolute top-2 right-1 z-20 text-white hover:text-pfcyan hover:scale-110 cursor-pointer"
+      :class="{ 'mobile-show-all': isLeftPage }">
+      <Icon icon="mdi:arrow-right-top-bold" class="w-6 h-6" />
+    </button>
+    <button 
+      @click="goToNextPage"
+      class="page-arrow page-arrow-bottom-right absolute bottom-2 right-1 z-20 text-white hover:text-pfcyan hover:scale-110 cursor-pointer"
+      :class="{ 'mobile-show-all': isLeftPage }">
       <Icon icon="mdi:arrow-right-bottom-bold" class="w-6 h-6" />
     </button>
   </template>
@@ -35,6 +71,7 @@ import { Icon } from '@iconify/vue'
 interface Props {
   thisPage?: number
   isFirstContentPage: boolean
+  totalPages?: number
 }
 
 const props = defineProps<Props>()
@@ -47,6 +84,17 @@ const toPage = inject<(pageNumber: number) => void>('toPage')
 const isLeftPage = computed(() => {
   if (props.thisPage === undefined || props.thisPage === null) return false
   return props.thisPage % 2 === 0
+})
+
+// Check if this is the cover page
+const isCoverPage = computed(() => {
+  return props.thisPage === -1 || props.thisPage === 0
+})
+
+// Check if this is the back cover page
+const isBackCoverPage = computed(() => {
+  if (props.totalPages === undefined) return false
+  return props.thisPage === props.totalPages + 1
 })
 
 // Navigation functions using the page flip instance
@@ -64,3 +112,40 @@ const goToPreviousPage = () => {
   toPage(prevPhysicalPage)
 }
 </script>
+
+<style scoped>
+/* Desktop: Hide arrows that shouldn't show on left/right pages */
+@media (min-width: 581px) {
+  .mobile-show-all {
+    display: none;
+  }
+}
+
+/* Mobile: Position arrows in four corners and show all (580px and below) */
+@media (max-width: 580px) {
+  .page-arrow-top-left {
+    top: 0.5rem;
+    left: 0.5rem;
+  }
+  
+  .page-arrow-bottom-left {
+    bottom: 0.5rem;
+    left: 0.5rem;
+  }
+  
+  .page-arrow-top-right {
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+  
+  .page-arrow-bottom-right {
+    bottom: 0.5rem;
+    right: 0.5rem;
+  }
+  
+  /* Show all arrows on mobile */
+  .mobile-show-all {
+    display: block;
+  }
+}
+</style>

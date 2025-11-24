@@ -6,7 +6,7 @@
     <div id="album" ref="albumRef" class="w-full">
         <div class="page page-cover page-cover-top" data-density="hard">
             <div class="page-content h-full card rounded-l-none relative" :style="bgStyle(coverImage)">
-                <PageArrows :this-page="-1" :is-first-content-page="false" />
+                <PageArrows :this-page="-1" :is-first-content-page="false" :total-pages="albumStore.totalPages" />
                 <img src="/logow-anim.svg" class="w-60 mx-auto animate-pulse" />
             </div>
         </div>
@@ -16,9 +16,9 @@
                 <div class="absolute inset-0  z-0 bg-linear-to-b from-blue-900 to-black/0" ></div>
                 <div class="absolute inset-0  opacity-50 mix-blend-multiply" :style="bgStyle(coverBackImage)"></div>
 
-                <PageArrows :this-page="0" :is-first-content-page="false" />
+                <PageArrows :this-page="0" :is-first-content-page="false" :total-pages="albumStore.totalPages" />
 
-                <div class="max-w-md mx-auto card bg-white/20 backdrop-blur-xl px-8 relative z-10">
+                <div class="max-w-md mx-auto card bg-white/20 backdrop-blur-xl px-8 relative z-10  max-h-full overflow-auto">
                     <div class="text-center font-bold text-2xl mb-4 text-white">Índice</div>
                     <AlbumIndex /> 
                 </div>
@@ -32,7 +32,7 @@
         
         <div class="page page-cover page-cover-bottom"  data-density="hard">
             <div class="page-content h-full bg-amber-600 bg-cover bg-center card rounded-l-none relative"  :style="bgStyle(backImage)" >
-                <PageArrows :this-page="albumStore.totalPages + 1" :is-first-content-page="false" />
+                <PageArrows :this-page="albumStore.totalPages + 1" :is-first-content-page="false" :total-pages="albumStore.totalPages" />
             </div>
         </div>
     </div>

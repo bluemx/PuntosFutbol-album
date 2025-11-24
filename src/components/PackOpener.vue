@@ -147,25 +147,45 @@
             </div>
           </div>
           
-          <!-- Open Pack Button -->
-          <div v-if="selectedPack" class="text-center mt-6">
-            <button 
-              @click="handleOpenPack(selectedPack.type)"
-              :disabled="isOpening"
-              class="btn btn-lg"
-              :class="selectedPack.type === 2 ? 'bg-linear-to-r from-yellow-400 to-yellow-600 text-white' : 'btn-primary'"
-            >
-              <Icon v-if="isOpening" icon="mdi:loading" class="w-5 h-5 mr-2 animate-spin" />
-              <Icon v-else icon="mdi:mirror-rectangle" class="w-5 h-5 mr-2" />
-              
-              {{ isOpening ? 'Abriendo...' : 'Abrir Sobre' }}
-            </button>
+          <!-- Open Pack Buttons -->
+          <div class="text-center mt-6 space-y-3">
+            <!-- Individual Pack Button -->
+            <div v-if="selectedPack">
+              <button 
+                @click="handleOpenPack(selectedPack.type)"
+                :disabled="isOpening"
+                class="btn btn-lg"
+                :class="selectedPack.type === 2 ? 'bg-linear-to-r from-yellow-400 to-yellow-600 text-white' : 'btn-primary'"
+              >
+                <Icon v-if="isOpening" icon="mdi:loading" class="w-5 h-5 mr-2 animate-spin" />
+                <Icon v-else icon="mdi:mirror-rectangle" class="w-5 h-5 mr-2" />
+                
+                {{ isOpening ? 'Abriendo...' : 'Abrir Sobre' }}
+              </button>
+            </div>
+            
+            <!-- Open All Packs Button -->
+            <div v-if="userStore.totalPacks > 1">
+              <button 
+                @click="handleOpenAllPacks"
+                :disabled="isOpening"
+                class="btn btn-lg bg-linear-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700"
+              >
+                <Icon v-if="isOpening" icon="mdi:loading" class="w-5 h-5 mr-2 animate-spin" />
+                <Icon v-else icon="mdi:package-variant-closed" class="w-5 h-5 mr-2" />
+                
+                {{ isOpening ? 'Abriendo...' : `Abrir Todos (${userStore.totalPacks})` }}
+              </button>
+              <p class="text-xs text-gray-500 mt-2">
+                o selecciona un sobre para abrirlo
+              </p>
+            </div>
+            
+            <!-- Instruction Text -->
+            <p v-if="!selectedPack && userStore.totalPacks === 1" class="text-sm text-gray-500">
+              Selecciona un sobre para abrirlo
+            </p>
           </div>
-          
-          <!-- Instruction Text -->
-          <p v-else class="text-center text-sm text-gray-500 mt-6">
-            Selecciona un sobre para abrirlo
-          </p>
         </div>
 
         <!-- Opened Cards Display -->
@@ -443,6 +463,91 @@ async function handleOpenPack(packTypeId: number = 1) {
     }
   } catch (error) {
     console.error('Failed to open pack:', error)
+    isOpening.value = false
+    
+    // Still show animation for a moment even on error
+    setTimeout(() => {
+      showOpeningAnimation.value = false
+      revealingCards.value = false
+    }, 2000)
+  }
+}
+
+async function handleOpenAllPacks() {
+  if (isOpening.value || userStore.totalPacks <= 0) return
+  
+  try {
+    isOpening.value = true
+    showOpeningAnimation.value = true
+    
+    // Determine pack type to show animation (prefer golden if available)
+    openingPackType.value = userStore.goldenPacks > 0 ? 2 : 1
+    
+    const allNewCards: UserCard[] = []
+    const totalPacksToOpen = userStore.totalPacks
+    
+    // Open all packs through API calls
+    for (let i = 0; i < totalPacksToOpen; i++) {
+      // Alternate between pack types based on availability
+      let packTypeId = 1
+      if (userStore.goldenPacks > 0) {
+        packTypeId = 2
+      } else if (userStore.defaultPacks > 0) {
+        packTypeId = 1
+      }
+      
+      const newCards = await userStore.openPack(packTypeId)
+      if (newCards && newCards.length > 0) {
+        allNewCards.push(...newCards)
+      }
+    }
+    
+    // Set all opened cards
+    openedCards.value = allNewCards
+    
+    // Generate random rotations for each card
+    cardRotations.value = openedCards.value.map(() => getRandomRotation())
+    
+    if (allNewCards.length > 0) {
+      // Track all newly opened cards
+      const cardIds = allNewCards.map(card => card.id)
+      addNewlyOpenedCards(cardIds)
+      // Reset selected pack
+      selectedPack.value = null
+    }
+    
+    // Wait 3 seconds to show the pack animation
+    await new Promise(resolve => setTimeout(resolve, 3000))
+    
+    // Start card reveal sequence
+    isOpening.value = false
+    
+    if (openedCards.value.length > 0) {
+      revealingCards.value = true
+      currentRevealIndex.value = 0
+      
+      // Reveal cards one by one
+      const revealInterval = setInterval(() => {
+        currentRevealIndex.value++
+        if (currentRevealIndex.value >= openedCards.value.length) {
+          clearInterval(revealInterval)
+          // After all revealed, hide animation and show results
+          setTimeout(() => {
+            showOpeningAnimation.value = false
+            revealingCards.value = false
+            currentRevealIndex.value = 0
+          }, 1000)
+        }
+      }, 1000)
+    } else {
+      // If no cards (error case), just hide animation after a moment
+      setTimeout(() => {
+        showOpeningAnimation.value = false
+        revealingCards.value = false
+      }, 2000)
+    }
+  } catch (error) {
+    console.error('Failed to open all packs:', error)
     isOpening.value = false
     
     // Still show animation for a moment even on error
