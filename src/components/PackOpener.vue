@@ -149,6 +149,8 @@
           
           <!-- Open Pack Buttons -->
           <div class="text-center mt-6 space-y-3">
+
+
             <!-- Individual Pack Button -->
             <div v-if="selectedPack">
               <button 
@@ -163,6 +165,14 @@
                 {{ isOpening ? 'Abriendo...' : 'Abrir Sobre' }}
               </button>
             </div>
+
+
+            <!-- Instructions text -->
+            <p class="text-sm flex gap-1 text-gray-500 font-bold bg-gray-100 w-fit mx-auto p-3 rounded mt-6">
+              <Icon icon="mdi:arrow-up-left" class="w-5 h-5 mr-2" />
+              SELECCIONA UN SOBRE PARA ABRIRLO
+            </p>
+            <p>o</p>
             
             <!-- Open All Packs Button -->
             <div v-if="userStore.totalPacks > 1">
@@ -174,17 +184,12 @@
                 <Icon v-if="isOpening" icon="mdi:loading" class="w-5 h-5 mr-2 animate-spin" />
                 <Icon v-else icon="mdi:package-variant-closed" class="w-5 h-5 mr-2" />
                 
-                {{ isOpening ? 'Abriendo...' : `Abrir Todos (${userStore.totalPacks})` }}
+                {{ isOpening ? 'Abriendo...' : `Abre todos tus sobres (${userStore.totalPacks})` }}
               </button>
-              <p class="text-xs text-gray-500 mt-2">
-                o selecciona un sobre para abrirlo
-              </p>
+              
             </div>
             
-            <!-- Instruction Text -->
-            <p v-if="!selectedPack && userStore.totalPacks === 1" class="text-sm text-gray-500">
-              Selecciona un sobre para abrirlo
-            </p>
+            
           </div>
         </div>
 
