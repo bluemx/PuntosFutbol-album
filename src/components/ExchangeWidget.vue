@@ -207,7 +207,7 @@
               :class="{
                 'bg-pfblue text-white shadow-lg scale-110': isInWanted(card.identifier),
                 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200': !isInWanted(card.identifier),
-                'opacity-50 bg-teal-500! text-white! alert!': userStore.ownsCard(card.identifier)
+                ' bg-linear-to-r from-green-700 to-teal-800  text-white! alert!': userStore.ownsCard(card.identifier)
               }">
               <span>{{ card.identifier }}</span>
               <span v-if="isInWanted(card.identifier)" class="text-[0.6rem] font-normal absolute bottom-0.5 right-0.5">
@@ -216,7 +216,7 @@
             </button>
           </div>
           <div class="mt-4">
-            <p class="text-xs  alert bg-teal-300 w-fit">
+            <p class="text-xs  alert border-green-700 text-teal-800  bg-green-50  w-fit">
                 <Icon icon="mdi:information" class="inline w-4 h-4" />
                 Estampas que ya tienes
             </p>
@@ -267,7 +267,7 @@
           <button 
             @click="startExchange"
             :disabled="selectedOffer.length === 0 || selectedWanted.length === 0 || isLoading"
-            class="btn flex-1 bg-linear-to-b from-green-500 to-teal-500 hover:from-green-600 text-white disabled:opacity-50 disabled:cursor-not-allowed">
+            class="btn flex-1 bg-linear-to-r from-green-700 to-teal-800 hover:text-amber-300 text-white disabled:opacity-50 disabled:cursor-not-allowed">
             <Icon 
               :icon="isLoading ? 'mdi:loading' : 'mdi:swap-horizontal'" 
               :class="{ 'animate-spin': isLoading }"

@@ -230,7 +230,7 @@
           <button 
             @click="sendSelectedStickers"
             :disabled="selectedStickers.length === 0 || isSending"
-            class="flex-1 btn bg-linear-to-b from-green-500 to-teal-500 hover:from-green-600"
+            class="flex-1 btn bg-linear-to-r from-green-700 to-teal-800 hover:text-amber-300"
             :class="{ 'opacity-50 cursor-not-allowed': selectedStickers.length === 0 || isSending }">
             <Icon v-if="isSending" icon="mdi:loading" class="w-4 h-4 mr-2 animate-spin" />
             <Icon v-else icon="mdi:send" class="w-4 h-4 mr-2" />
