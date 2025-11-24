@@ -5,8 +5,7 @@ export interface Card {
 }
 
 export const cardsDatabase: Card[] = 
-[
-  {"acRegId":463,"identifier":5,"type":1},
+[{"acRegId":463,"identifier":5,"type":1},
 {"acRegId":464,"identifier":10,"type":1},
 {"acRegId":465,"identifier":21,"type":1},
 {"acRegId":466,"identifier":22,"type":1},
@@ -96,7 +95,7 @@ export const cardsDatabase: Card[] =
 {"acRegId":550,"identifier":459,"type":2},
 {"acRegId":551,"identifier":460,"type":2},
 {"acRegId":552,"identifier":461,"type":2},
-{"acRegId":553,"identifier":462,"type":2}
-
-
-];
+{"acRegId":553,"identifier":462,"type":2},
+{"acRegId":557,"identifier":463,"type":2},
+{"acRegId":558,"identifier":464,"type":2},
+{"acRegId":559,"identifier":465,"type":2}];
