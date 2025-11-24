@@ -103,7 +103,7 @@ export const useUserStore = defineStore('user', () => {
       console.log(response.data)
       customerId.value = String(response.data.id)
         name.value = String(response.data.name)
-        avatar.value = String(response.data.avatar)
+        avatar.value = response.data.avatar || '/placeholder-avatar.webp'
         packsToOpen.value = response.data.packsToOpen || []
       // Keep the entire UserCard structure intact, filter out ghost cards (id = 0)
       ownedCards.value = (response.data.userCards || []).filter(card => card.id > 0)
