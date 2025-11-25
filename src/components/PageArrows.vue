@@ -1,9 +1,9 @@
 <template>
   <!-- Desktop: Left/Right arrows based on page side -->
-  <!-- Mobile (≤580px): All 4 arrows on all pages except cover (-1, 0) and back cover (totalPages + 1) -->
+  <!-- Mobile (≤580px): All 4 arrows on all pages except cover (-1) and back cover (totalPages + 1) -->
   
   <!-- Cover page (-1): Only right arrows (desktop and mobile) -->
-  <template v-if="isCoverPage">
+  <template v-if="props.thisPage === -1">
     <button 
       @click="goToNextPage"
       class="page-arrow page-arrow-top-right absolute top-2 right-1 z-20 text-white hover:text-pfcyan hover:scale-110 cursor-pointer">
@@ -34,17 +34,15 @@
   <template v-else>
     <!-- Left arrows (always on mobile, only on even pages for desktop) -->
     <button 
-      v-if="!isFirstContentPage"
       @click="goToPreviousPage"
       class="page-arrow page-arrow-top-left absolute top-2 left-1 z-20 text-white hover:text-pfcyan hover:scale-110 cursor-pointer"
-      :class="{ 'mobile-show-all': !isLeftPage }">
+      :class="{ 'mobile-show-all': !isLeftPage, 'desktop-hide-first': isFirstContentPage }">
       <Icon icon="mdi:arrow-left-top-bold" class="w-6 h-6" />
     </button>
     <button 
-      v-if="!isFirstContentPage"
       @click="goToPreviousPage"
       class="page-arrow page-arrow-bottom-left absolute bottom-2 left-1 z-20 text-white hover:text-pfcyan hover:scale-110 cursor-pointer"
-      :class="{ 'mobile-show-all': !isLeftPage }">
+      :class="{ 'mobile-show-all': !isLeftPage, 'desktop-hide-first': isFirstContentPage }">
       <Icon icon="mdi:arrow-left-bottom-bold" class="w-6 h-6" />
     </button>
 
@@ -86,11 +84,6 @@ const isLeftPage = computed(() => {
   return props.thisPage % 2 === 0
 })
 
-// Check if this is the cover page
-const isCoverPage = computed(() => {
-  return props.thisPage === -1 || props.thisPage === 0
-})
-
 // Check if this is the back cover page
 const isBackCoverPage = computed(() => {
   if (props.totalPages === undefined) return false
@@ -117,6 +110,10 @@ const goToPreviousPage = () => {
 /* Desktop: Hide arrows that shouldn't show on left/right pages */
 @media (min-width: 581px) {
   .mobile-show-all {
+    display: none;
+  }
+  
+  .desktop-hide-first {
     display: none;
   }
 }
