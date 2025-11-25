@@ -94,7 +94,12 @@
               <button 
                 class="btn btn-sm bg-linear-to-r from-green-700 to-teal-800 hover:text-amber-300 text-white"
                 @click.stop="viewFriendStickers(friend)">
-                Ver estampas
+                Ver estampas pegadas <span v-if="getFriendInAlbumCount(friend.friendCustomerID) !== null">({{ getFriendInAlbumCount(friend.friendCustomerID) }})</span>
+              </button>
+              <button 
+                class="btn btn-sm bg-linear-to-r from-amber-600 to-orange-700 hover:text-white text-white"
+                @click.stop="viewFriendLooseStickers(friend)">
+                Ver estampas sin pegar ({{ friend.notInAlbum }})
               </button>
               <button 
                 class="btn btn-sm btn-primary"
@@ -392,6 +397,91 @@
         </div>
       </div>
     </div>
+
+    <!-- Friend Loose Stickers Viewer Modal -->
+    <div 
+      v-if="showFriendLooseStickersModal && viewingLooseFriend" 
+      class="fixed inset-0 z-60 flex items-center justify-center bg-black/50 backdrop-blur-md"
+      @click="closeFriendLooseStickersModal">
+      
+      <div 
+        class="bg-white rounded-lg p-6 w-full max-w-6xl max-h-[85vh] flex flex-col shadow-xl"
+        @click.stop>
+        
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-6">
+          <div>
+            <h2 class="text-2xl font-bold text-pfblue">Estampas sin pegar de {{ viewingLooseFriend.nickname }}</h2>
+            <p class="text-sm text-gray-600 mt-1">
+              {{ friendLooseStickers.length }} estampa{{ friendLooseStickers.length !== 1 ? 's' : '' }} sin pegar{{ friendLooseStickers.length !== 1 ? 's' : '' }}
+            </p>
+          </div>
+          <button 
+            @click="closeFriendLooseStickersModal"
+            class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100">
+            <Icon icon="mdi:close" class="w-6 h-6" />
+          </button>
+        </div>
+
+        <!-- Loading State -->
+        <div v-if="isLoadingFriendLooseStickers" class="flex-1 flex items-center justify-center">
+          <div class="text-center py-12">
+            <Icon icon="mdi:loading" class="w-12 h-12 mx-auto animate-spin text-pfblue" />
+            <p class="text-gray-600 mt-4">Cargando estampas...</p>
+          </div>
+        </div>
+
+        <!-- Stickers Horizontal Scroll -->
+        <div v-else-if="filteredFriendLooseStickers.length > 0" class="flex-1 overflow-x-auto overflow-y-hidden pb-4">
+          <div class="flex gap-4 snap-x snap-mandatory">
+            <div 
+              v-for="card in filteredFriendLooseStickers" 
+              :key="card.id"
+              class="relative group shrink-0 snap-start w-32">
+              
+              <CardRenderer
+                :iscard="true" 
+                :identifier="card.identifier ? Number(card.identifier) : 0"  
+                :base="card.resource"
+                :cardType="getCardTypeForRenderer(card)"
+              />
+
+              <!-- Card Info -->
+              <div class="mt-2 text-center text-xs text-gray-600">
+                <div class="font-semibold truncate">{{ getCardDescription(card.identifier) }}</div>
+                <div class="text-gray-500">{{ getCategoryName(card.identifier) }}</div>
+                <div class="text-gray-400">{{ getCardType(card.identifier) }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div v-else-if="!isLoadingFriendLooseStickers && friendLooseStickers.length === 0" class="flex-1 flex items-center justify-center">
+          <div class="text-center py-12">
+            <Icon icon="mdi:cards-outline" class="w-16 h-16 mx-auto text-gray-400" />
+            <p class="text-gray-600 mt-4">No tiene estampas sin pegar</p>
+          </div>
+        </div>
+
+        <!-- No Results State -->
+        <div v-else class="flex-1 flex items-center justify-center">
+          <div class="text-center py-12">
+            <Icon icon="mdi:filter-off" class="w-16 h-16 mx-auto text-gray-400" />
+            <p class="text-gray-600 mt-4">No se encontraron estampas con los filtros seleccionados</p>
+          </div>
+        </div>
+
+        <!-- Close Button -->
+        <div class="mt-6 pt-4 border-t">
+          <button 
+            @click="closeFriendLooseStickersModal"
+            class="btn w-full btn-secondary">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -446,6 +536,22 @@ const isLoadingFriendStickers = ref(false)
 const friendStickerCategory = ref<number | ''>('')
 const friendStickerNumber = ref<number | ''>('')
 
+// Friend loose stickers viewer state
+const showFriendLooseStickersModal = ref(false)
+const viewingLooseFriend = ref<Friend | null>(null)
+const friendLooseStickers = ref<any[]>([])
+const isLoadingFriendLooseStickers = ref(false)
+const friendLooseStickerCategory = ref<number | ''>('')
+const friendLooseStickerNumber = ref<number | ''>('')
+
+// Cache for friend stickers counts
+const friendStickersCache = ref<Record<number, { inAlbum: number; notInAlbum: number }>>({})
+
+// Get friend's inAlbum count from cache
+function getFriendInAlbumCount(friendCustomerID: number): number | null {
+  return friendStickersCache.value[friendCustomerID]?.inAlbum ?? null
+}
+
 // Filter friends by nickname
 const filteredFriends = computed(() => {
   if (!searchQuery.value.trim()) {
@@ -484,6 +590,29 @@ const filteredAvailableStickers = computed(() => {
     if (selectedCategory.value !== '' && selectedCategory.value !== null && selectedCategory.value !== undefined) {
       const cardData = cardsDatabase.find(c => c.identifier === Number(card.identifier))
       if (!cardData || cardData.category !== selectedCategory.value) {
+        return false
+      }
+    }
+
+    return true
+  })
+})
+
+// Filter friend loose stickers based on category and number
+const filteredFriendLooseStickers = computed(() => {
+  return friendLooseStickers.value.filter(card => {
+    // Filter by number if specified
+    if (friendLooseStickerNumber.value !== '' && friendLooseStickerNumber.value !== null && friendLooseStickerNumber.value !== undefined && !isNaN(Number(friendLooseStickerNumber.value))) {
+      const cardIdentifier = card.identifier ? Number(card.identifier) : 0
+      if (cardIdentifier !== Number(friendLooseStickerNumber.value)) {
+        return false
+      }
+    }
+
+    // Filter by category if specified
+    if (friendLooseStickerCategory.value !== '' && friendLooseStickerCategory.value !== null && friendLooseStickerCategory.value !== undefined) {
+      const cardData = cardsDatabase.find(c => c.identifier === Number(card.identifier))
+      if (!cardData || cardData.category !== friendLooseStickerCategory.value) {
         return false
       }
     }
@@ -666,9 +795,17 @@ async function viewFriendStickers(friend: Friend) {
   try {
     const response = await apiService.getCustomerStickersCustom(friend.friendCustomerID)
     if (response.success && response.data.userCards) {
+      const validCards = response.data.userCards.filter(card => card.id > 0)
+      
+      // Cache the counts
+      friendStickersCache.value[friend.friendCustomerID] = {
+        inAlbum: validCards.filter(card => card.inAlbum).length,
+        notInAlbum: validCards.filter(card => !card.inAlbum).length
+      }
+      
       // Filter only cards that are in album (inAlbum: true)
-      friendStickers.value = response.data.userCards
-        .filter(card => card.id > 0 && card.inAlbum)
+      friendStickers.value = validCards
+        .filter(card => card.inAlbum)
         .sort((a, b) => {
           const idA = a.identifier ? Number(a.identifier) : 0
           const idB = b.identifier ? Number(b.identifier) : 0
@@ -688,6 +825,49 @@ function closeFriendStickersModal() {
   friendStickers.value = []
   friendStickerCategory.value = ''
   friendStickerNumber.value = ''
+}
+
+async function viewFriendLooseStickers(friend: Friend) {
+  viewingLooseFriend.value = friend
+  showFriendLooseStickersModal.value = true
+  isLoadingFriendLooseStickers.value = true
+  friendLooseStickerCategory.value = ''
+  friendLooseStickerNumber.value = ''
+  friendLooseStickers.value = []
+  
+  try {
+    const response = await apiService.getCustomerStickersCustom(friend.friendCustomerID)
+    if (response.success && response.data.userCards) {
+      const validCards = response.data.userCards.filter(card => card.id > 0)
+      
+      // Cache the counts
+      friendStickersCache.value[friend.friendCustomerID] = {
+        inAlbum: validCards.filter(card => card.inAlbum).length,
+        notInAlbum: validCards.filter(card => !card.inAlbum).length
+      }
+      
+      // Filter only cards that are NOT in album (inAlbum: false)
+      friendLooseStickers.value = validCards
+        .filter(card => !card.inAlbum)
+        .sort((a, b) => {
+          const idA = a.identifier ? Number(a.identifier) : 0
+          const idB = b.identifier ? Number(b.identifier) : 0
+          return idA - idB
+        })
+    }
+  } catch (err) {
+    console.error('Error loading friend loose stickers:', err)
+  } finally {
+    isLoadingFriendLooseStickers.value = false
+  }
+}
+
+function closeFriendLooseStickersModal() {
+  showFriendLooseStickersModal.value = false
+  viewingLooseFriend.value = null
+  friendLooseStickers.value = []
+  friendLooseStickerCategory.value = ''
+  friendLooseStickerNumber.value = ''
 }
 
 function close() {

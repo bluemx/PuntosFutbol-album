@@ -2,7 +2,22 @@
     <div class=" w-10/12 mx-auto card bg-black/40 backdrop-blur-xl text-center gap-2 p-2">
 
     <!-- Category Progress -->
-      <h3 class="text-sm lg:text-xl py-2  text-white">Tienes <span class="font-semibold text-blue-200 text-shadow-lg">{{ userStore.totalOwnedCards }} de {{ cardsDatabase.length }} estampas </span> en tu álbum</h3>
+      <h3 class="text-sm lg:text-xl py-1  text-white">Tienes <span class="font-semibold text-blue-200 text-shadow-lg">{{ userStore.totalOwnedCards }} de {{ cardsDatabase.length }} estampas</span> en tu álbum</h3>
+      
+      <!-- Progress Bar -->
+      <div class="w-full max-w-2xl mx-auto">
+        <div class="flex justify-between items-center mb-1">
+          <span class="text-sm text-blue-200">Progreso</span>
+          <span class="text-sm font-bold text-blue-200">{{ completionPercentage }}%</span>
+        </div>
+        <div class="w-full bg-gray-700/50 rounded-full h-2 overflow-hidden">
+          <div 
+            class="bg-linear-to-r from-blue-500 to-teal-400 h-2 rounded transition-all duration-500 ease-out"
+            :style="{ width: completionPercentage + '%' }"
+          ></div>
+        </div>
+      </div>
+
       <div class="flex flex-wrap justify-center items-center gap-1 grow shrink">
         <div 
           v-for="category in categoryProgress" 
@@ -39,6 +54,12 @@ const userStore = useUserStore()
 
 
 
+
+const completionPercentage = computed(() => {
+  const total = cardsDatabase.length
+  const owned = userStore.totalOwnedCards
+  return total > 0 ? Math.round((owned / total) * 100) : 0
+})
 
 const categoryProgress = computed(() => {
   return categoriesDatabase.map(category => {
