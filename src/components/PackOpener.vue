@@ -372,7 +372,7 @@ function selectPack(type: number, index: number) {
 
 // Extract identifier from resource URL (get the number from filename)
 function getCardIdentifier(resourceUrl: string): number {
-  const match = resourceUrl.match(/(\d+)\.webp$/)
+  const match = resourceUrl.match(/(\d+)\.(webp|mp4)$/)
   return match && match[1] ? parseInt(match[1]) : 0
 }
 
@@ -387,19 +387,16 @@ const getCardTypeForRenderer = (card: any): 'normal' | 'metal' | 'animated' => {
 
 // Get card description from database
 function getCardDescription(card: UserCard): string {
-  const identifier = getCardIdentifier(card.resource)
+  // Use card.identifier if available, otherwise extract from resource URL
+  const identifier = card.identifier ? Number(card.identifier) : getCardIdentifier(card.resource)
   const cardData = cardsDatabase.find(c => c.identifier === identifier)
-  return cardData?.desc || `Estampa #${identifier}`
+  return cardData?.desc || ''
 }
 
-// Get card type (Normal, Metal, or Animada)
+// Get card type (use API type field directly)
 function getCardType(card: UserCard): string {
-  const identifier = getCardIdentifier(card.resource)
-  const cardData = cardsDatabase.find(c => c.identifier === identifier)
-  if (!cardData) return 'Clásica'
-  if (cardData.metal) return 'Metal'
-  if (cardData.anim) return 'Animada'
-  return 'Clásica'
+  // Return the type from the API response
+  return card.type || 'Clásica'
 }
 
 // Open card detail modal
