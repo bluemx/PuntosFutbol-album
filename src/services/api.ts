@@ -11,6 +11,7 @@ const API_TEST_URL = 'https://puntosfutbol2026.com/gatewaytest/api'
 const API_BASE_URL =
   (import.meta as any).env?.VITE_API_TEST_URL || API_PROD_URL
 */
+
 const API_BASE_URL = API_TEST_URL
 
 // Log vistoso cuando estamos en modo TEST
