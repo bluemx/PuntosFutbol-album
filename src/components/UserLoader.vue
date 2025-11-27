@@ -27,7 +27,7 @@
       </button>
     </div>
 
-    <!-- Success State -->
+    <!-- Success State (auto-continues to album) -->
     <div v-else-if="userStore.isLoggedIn" class="text-center">
       <h2 class="text-3xl font-bold mb-4">Bienvenido a tu álbum</h2>
       <img src="/logow-anim.svg" class="w-40 mx-auto" />
@@ -35,19 +35,13 @@
       <div class="bg-white/10 rounded-lg p-6 mb-6 backdrop-blur-sm mt-10">
         <div class="text-sm text-blue-200">Cuentas con {{ userStore.totalOwnedCards }} de {{ cardsDatabase.length }} estampas</div>
       </div>
-
-      <button
-        @click="continueToAlbum"
-        class="bg-white text-blue-900 px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition-colors"
-      >
-        Abrir Álbum
-      </button>
+      <div class="text-blue-200">Entrando al álbum…</div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useUserStore } from '../stores/user'
 import { cardsDatabase } from '../data/cards';
 
@@ -119,6 +113,18 @@ onMounted(() => {
       console.log('📤 Sent iframeReady message to parent')
     }
   }
+
+  // If already logged in, continue immediately
+  if (userStore.isLoggedIn) {
+    continueToAlbum()
+  }
+
+  // Auto-continue when login state becomes true
+  watch(() => userStore.isLoggedIn, (loggedIn) => {
+    if (loggedIn) {
+      continueToAlbum()
+    }
+  })
 })
 
 onUnmounted(() => {

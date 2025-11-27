@@ -66,16 +66,10 @@
             <!-- Avatar -->
             <div class="shrink-0">
               <img 
-                v-if="friend.avatarImage"
-                :src="friend.avatarImage" 
+                :src="friend.avatarImage || 'https://cdn.myblueengine.com/PuntosFut/Images/default.png'" 
                 :alt="friend.nickname"
                 class="w-16 h-16 rounded-full object-cover border-2 border-pfblue"
               />
-              <div 
-                v-else
-                class="w-16 h-16 rounded-full bg-pfblue flex items-center justify-center text-white text-xl font-bold">
-                {{ getInitials(friend.nickname) }}
-              </div>
             </div>
 
             <!-- Info -->
@@ -676,16 +670,6 @@ const getCardType = (identifier: string | number | null) => {
   if (cardData.metal) return 'Metal'
   if (cardData.anim) return 'Animada'
   return 'Clásica'
-}
-
-// Get initials from nickname
-function getInitials(nickname: string): string {
-  return nickname
-    .split(' ')
-    .map(word => word[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2)
 }
 
 // Load friends from API
