@@ -3,13 +3,13 @@
     ref="cardWrapper"
     class=" transform-gpu w-full"
     :class="{
-      'cursor-pointer hover:-translate-y-1 hover:scale-105 transition-all shrink-0 grow-0 w-full ': !open,
+      'cursor-pointer hover:-translate-y-1 hover:scale-105 transition-all shrink-0 grow-0 w-full': !open,
       'absolute z-50 flex flex-col justify-center items-center w-auto! ': open,
     }"
     :style="open ? modalStyle : {}"
     @click="openCard">
 
-    <div :class="{'relative':true, 'w-full max-w-sm': open}">
+    <div :class="{'relative':true, 'w-full   max-w-2/3 lg:max-w-sm ': open}">
       
     
     <CardRenderer 

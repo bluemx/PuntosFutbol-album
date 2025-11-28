@@ -30,7 +30,7 @@ import AlbumTopbar from './components/AlbumTopbar.vue'
 import UserLoader from './components/UserLoader.vue'
 import WelcomeNewsModal from './components/WelcomeNewsModal.vue'
 import ExchangeMatchesModal from './components/ExchangeMatchesModal.vue'
-import mainbg from '../public/mainbg.webp'
+import mainbg from '/mainbg.webp'
 
 // State
 const isReady = ref(false)

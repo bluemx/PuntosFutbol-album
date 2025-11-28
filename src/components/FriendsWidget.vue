@@ -369,7 +369,7 @@
         <div v-else-if="!isLoadingFriendStickers && friendStickers.length === 0" class="flex-1 flex items-center justify-center">
           <div class="text-center py-12">
             <Icon icon="mdi:cards-outline" class="w-16 h-16 mx-auto text-gray-400" />
-            <p class="text-gray-600 mt-4">No tiene estampas pegadas</p>
+            <p class="text-gray-600 mt-4">No tienes estampas pegadas</p>
           </div>
         </div>
 
@@ -407,7 +407,7 @@
           <div>
             <h2 class="text-2xl font-bold text-pfblue">Estampas sin pegar de {{ viewingLooseFriend.nickname }}</h2>
             <p class="text-sm text-gray-600 mt-1">
-              {{ friendLooseStickers.length }} estampa{{ friendLooseStickers.length !== 1 ? 's' : '' }} sin pegar{{ friendLooseStickers.length !== 1 ? 's' : '' }}
+              {{ friendLooseStickers.length }} estampa{{ friendLooseStickers.length !== 1 ? 's' : '' }} sin pegar
             </p>
           </div>
           <button 
@@ -454,7 +454,7 @@
         <div v-else-if="!isLoadingFriendLooseStickers && friendLooseStickers.length === 0" class="flex-1 flex items-center justify-center">
           <div class="text-center py-12">
             <Icon icon="mdi:cards-outline" class="w-16 h-16 mx-auto text-gray-400" />
-            <p class="text-gray-600 mt-4">No tiene estampas sin pegar</p>
+            <p class="text-gray-600 mt-4">s estampas sin pegar</p>
           </div>
         </div>
 

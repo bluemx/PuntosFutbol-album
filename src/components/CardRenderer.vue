@@ -2,7 +2,7 @@
 
   <div 
     ref="cardElement"
-    class="cardview card-3d w-full relative overflow-hidden  rounded-[6%]" 
+    class="cardview card-3d w-full relative overflow-hidden  rounded-[6%] " 
     v-if="props.base" 
     :class="ifCardClasses"
     @imageLoaded="handleImageLoaded"
