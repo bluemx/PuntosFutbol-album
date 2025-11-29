@@ -1,5 +1,6 @@
 // API service for all album-related requests
 
+<<<<<<< HEAD
 
 const API_PROD_URL = 'https://album.puntosfutbol.com/gateway/api'
 const API_BASE_URL =
@@ -10,6 +11,33 @@ const API_BASE_URL =
   } else {
     console.log('#PROD')
   }
+=======
+// API service for all album-related requests
+
+//const API_PROD_URL = 'https://album.puntosfutbol.com/gateway/api'
+const API_TEST_URL = 'https://puntosfutbol2026.com/gatewaytest/api'
+
+// Si existe la variable de entorno VITE_API_TEST_URL, úsala.
+// Si no existe, usa siempre producción por defecto.
+/*
+const API_BASE_URL =
+  (import.meta as any).env?.VITE_API_TEST_URL || API_PROD_URL
+*/
+
+const API_BASE_URL = API_TEST_URL
+
+// Log vistoso cuando estamos en modo TEST
+const __TEST_URL = (import.meta as any).env?.VITE_API_TEST_URL
+if (__TEST_URL) {
+  try {
+    const banner = '%c TEST API ACTIVE'
+    const style1 = 'color:#fff;background:#9333ea;padding:4px 8px;border-radius:4px;font-weight:700; font-size:40px;'
+    console.log(banner, style1)
+  } catch (_) {
+    console.log('TEST API ACTIVE')
+  }
+}
+>>>>>>> Develop
 
 const API_KEY = 'vimSfZ8FCAB7U2ng6cG7YvVQDeIht'
 

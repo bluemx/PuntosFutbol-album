@@ -260,7 +260,7 @@ const hasCardInAlbum = (identifier: string | number | null) => {
 const getCardDescription = (identifier: string | number | null) => {
   if (identifier === null) return ''
   const cardData = cardsDatabase.find(c => c.identifier === Number(identifier))
-  return cardData?.desc || `Estampa #${identifier}`
+  return cardData?.desc || ''
 }
 
 // Get category name from database
