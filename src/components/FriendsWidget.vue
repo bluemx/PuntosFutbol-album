@@ -75,12 +75,14 @@
             <!-- Info -->
             <div class="flex-1 min-w-0">
               <h3 class="text-lg font-bold text-pfblue truncate">{{ friend.nickname }}</h3>
+              <!--
               <div class="flex items-center gap-2 mt-1">
                 <Icon icon="mdi:cards-outline" class="w-4 h-4 text-gray-500" />
                 <span class="text-sm text-gray-600">
                   {{ friend.notInAlbum }} estampas sin pegar
                 </span>
               </div>
+            -->
             </div>
 
             <!-- Action Buttons -->
@@ -88,7 +90,7 @@
               <button 
                 class="btn btn-sm bg-linear-to-r from-green-700 to-teal-800 hover:text-amber-300 text-white"
                 @click.stop="viewFriendStickers(friend)">
-                Ver estampas pegadas <span v-if="getFriendInAlbumCount(friend.friendCustomerID) !== null">({{ getFriendInAlbumCount(friend.friendCustomerID) }})</span>
+                Ver estampas pegadas ({{ friend.inAlbum }})
               </button>
               <button 
                 class="btn btn-sm bg-linear-to-r from-amber-600 to-orange-700 hover:text-white text-white"
@@ -538,13 +540,7 @@ const isLoadingFriendLooseStickers = ref(false)
 const friendLooseStickerCategory = ref<number | ''>('')
 const friendLooseStickerNumber = ref<number | ''>('')
 
-// Cache for friend stickers counts
-const friendStickersCache = ref<Record<number, { inAlbum: number; notInAlbum: number }>>({})
-
-// Get friend's inAlbum count from cache
-function getFriendInAlbumCount(friendCustomerID: number): number | null {
-  return friendStickersCache.value[friendCustomerID]?.inAlbum ?? null
-}
+// Note: counts are now provided by API on Friend (inAlbum, notInAlbum)
 
 // Filter friends by nickname
 const filteredFriends = computed(() => {
@@ -781,12 +777,6 @@ async function viewFriendStickers(friend: Friend) {
     if (response.success && response.data.userCards) {
       const validCards = response.data.userCards.filter(card => card.id > 0)
       
-      // Cache the counts
-      friendStickersCache.value[friend.friendCustomerID] = {
-        inAlbum: validCards.filter(card => card.inAlbum).length,
-        notInAlbum: validCards.filter(card => !card.inAlbum).length
-      }
-      
       // Filter only cards that are in album (inAlbum: true)
       friendStickers.value = validCards
         .filter(card => card.inAlbum)
@@ -823,12 +813,6 @@ async function viewFriendLooseStickers(friend: Friend) {
     const response = await apiService.getCustomerStickersCustom(friend.friendCustomerID)
     if (response.success && response.data.userCards) {
       const validCards = response.data.userCards.filter(card => card.id > 0)
-      
-      // Cache the counts
-      friendStickersCache.value[friend.friendCustomerID] = {
-        inAlbum: validCards.filter(card => card.inAlbum).length,
-        notInAlbum: validCards.filter(card => !card.inAlbum).length
-      }
       
       // Filter only cards that are NOT in album (inAlbum: false)
       friendLooseStickers.value = validCards

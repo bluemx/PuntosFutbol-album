@@ -1,6 +1,15 @@
 // API service for all album-related requests
-//const API_BASE_URL = 'https://www.puntosfutbol.com/apialbum/api'
-const API_BASE_URL = 'https://album.puntosfutbol.com/gateway/api'
+
+
+const API_PROD_URL = 'https://album.puntosfutbol.com/gateway/api'
+const API_BASE_URL =
+  (import.meta as any).env?.VITE_API_TEST_URL || API_PROD_URL
+
+  if((import.meta as any).env?.VITE_API_TEST_URL){
+    console.log('#TEST:', (import.meta as any).env?.VITE_API_TEST_URL)
+  } else {
+    console.log('#PROD')
+  }
 
 const API_KEY = 'vimSfZ8FCAB7U2ng6cG7YvVQDeIht'
 
@@ -64,6 +73,7 @@ export interface Friend {
   friendCustomerID: number
   nickname: string
   avatarImage: string // base64 image
+  inAlbum: number
   notInAlbum: number
 }
 
