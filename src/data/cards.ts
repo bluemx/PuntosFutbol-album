@@ -464,17 +464,5 @@ export const cardsDatabase: Card[] =
 {"acRegId":451,"identifier":451,"category":8,"desc":"Copa final","disposition":"Vertical4","type":0,"metal":false,"anim":false,"has3d":""},
 {"acRegId":452,"identifier":452,"category":8,"desc":"Copa final","disposition":"Vertical4","type":0,"metal":false,"anim":false,"has3d":""},
 {"acRegId":453,"identifier":453,"category":8,"desc":"Copa final","disposition":"Vertical4","type":0,"metal":false,"anim":false,"has3d":""},
-{"acRegId":454,"identifier":454,"category":8,"desc":"Copa final","disposition":"Vertical4","type":0,"metal":false,"anim":false,"has3d":""},
-{"acRegId":455,"identifier":456,"category":12,"desc":"American Express","disposition":"Horizontal","type":0,"metal":false,"anim":true,"has3d":""},
-{"acRegId":456,"identifier":457,"category":12,"desc":"Barcel","disposition":"Horizontal","type":0,"metal":false,"anim":true,"has3d":""},
-{"acRegId":457,"identifier":458,"category":12,"desc":"Bodegas Alianza","disposition":"Horizontal","type":0,"metal":false,"anim":true,"has3d":""},
-{"acRegId":458,"identifier":459,"category":12,"desc":"Casa Ley","disposition":"Horizontal","type":0,"metal":false,"anim":true,"has3d":""},
-{"acRegId":459,"identifier":460,"category":12,"desc":"DHL","disposition":"Horizontal","type":0,"metal":false,"anim":true,"has3d":""},
-{"acRegId":460,"identifier":461,"category":12,"desc":"Dportenis","disposition":"Horizontal","type":0,"metal":false,"anim":true,"has3d":""},
-{"acRegId":461,"identifier":462,"category":12,"desc":"Librerías Gandhi","disposition":"Horizontal","type":0,"metal":false,"anim":true,"has3d":""},
-{"acRegId":462,"identifier":463,"category":12,"desc":"Lumen","disposition":"Horizontal","type":0,"metal":false,"anim":true,"has3d":""},
-{"acRegId":554,"identifier":464,"category":12,"desc":"Modelorama","disposition":"Horizontal","type":0,"metal":false,"anim":true,"has3d":""},
-{"acRegId":555,"identifier":465,"category":12,"desc":"Telcel","disposition":"Horizontal","type":0,"metal":false,"anim":true,"has3d":""},
-{"acRegId":556,"identifier":466,"category":12,"desc":"Waldo's","disposition":"Horizontal","type":0,"metal":false,"anim":true,"has3d":""},
-{"acRegId":560,"identifier":455,"category":12,"desc":"Aeromexico","disposition":"Horizontal","type":0,"metal":false,"anim":true,"has3d":""}]
+{"acRegId":454,"identifier":454,"category":8,"desc":"Copa final","disposition":"Vertical4","type":0,"metal":false,"anim":false,"has3d":""}]
 ;

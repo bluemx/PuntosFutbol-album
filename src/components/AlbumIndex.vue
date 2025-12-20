@@ -6,6 +6,7 @@
         <template v-for="category in categoryDistribution">
             <button class="btn-outline grow" @click="navigateToCategory(category.categoryId)">{{ category.categoryName }}</button>
         </template>
+        <button class="btn-outline grow" @click="navigateToFinal">Final</button>
         <button class="btn-outline grow" @click="navigateToContraportada">Contraportada</button>
     </div>
     
@@ -51,6 +52,11 @@ const navigateToPortada = () => {
 // Navigate to back cover (last page)
 const navigateToContraportada = () => {
   albumStore.goToLastPage();
+  emit('navigate');
+};
+// Navigate to penultimate page
+const navigateToFinal = () => {
+  albumStore.goToPage(albumStore.totalPhysicalPages - 2);
   emit('navigate');
 };
 

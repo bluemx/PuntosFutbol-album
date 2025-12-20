@@ -87,16 +87,4 @@ export const cardsDatabase: Card[] =
 {"acRegId":542,"identifier":369,"type":2},
 {"acRegId":543,"identifier":370,"type":2},
 {"acRegId":544,"identifier":371,"type":2},
-{"acRegId":545,"identifier":372,"type":2},
-{"acRegId":546,"identifier":456,"type":2},
-{"acRegId":547,"identifier":457,"type":2},
-{"acRegId":548,"identifier":458,"type":2},
-{"acRegId":549,"identifier":459,"type":2},
-{"acRegId":550,"identifier":460,"type":2},
-{"acRegId":551,"identifier":461,"type":2},
-{"acRegId":552,"identifier":462,"type":2},
-{"acRegId":553,"identifier":463,"type":2},
-{"acRegId":557,"identifier":464,"type":2},
-{"acRegId":558,"identifier":465,"type":2},
-{"acRegId":559,"identifier":466,"type":2},
-{"acRegId":561,"identifier":455,"type":2}];
+{"acRegId":545,"identifier":372,"type":2}];
