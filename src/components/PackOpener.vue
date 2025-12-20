@@ -393,10 +393,20 @@ function getCardDescription(card: UserCard): string {
   return cardData?.desc || ''
 }
 
-// Get card type (use API type field directly)
+// Get card type label for display
 function getCardType(card: UserCard): string {
-  // Return the type from the API response
-  return card.type || 'Clásica'
+  const apiType = (card.type || '').toLowerCase().trim()
+
+  // Normalize common API/type variants
+  if (apiType === 'metal') return 'Metal'
+  if (apiType === 'animado' || apiType === 'animated' || apiType === 'animada') return 'Animada'
+  if (apiType === 'clasica' || apiType === 'classica' || apiType === 'classic' || apiType === 'normal') return 'Clásica'
+
+  // Fallback: use alternatives mapping via acRegId
+  const alt = card.acRegId ? cardsAlternatives.find(a => a.acRegId === card.acRegId) : undefined
+  if (alt?.type === 1) return 'Metal'
+  if (alt?.type === 2) return 'Animada'
+  return 'Clásica'
 }
 
 // Open card detail modal
