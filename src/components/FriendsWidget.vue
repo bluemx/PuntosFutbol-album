@@ -683,6 +683,10 @@ async function loadFriends() {
     const response = await apiService.getFriends(userStore.customerId)
     if (response.success) {
       friends.value = response.data
+    } else if (response.errorCode === -1) {
+      // API returns -1 when the user has no friends yet.
+      friends.value = []
+      error.value = null
     } else {
       error.value = response.errorDescription || 'Error al cargar amigos'
     }
