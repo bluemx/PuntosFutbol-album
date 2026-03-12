@@ -64,22 +64,35 @@
           </div>
         </div>
 
-        <!-- Horizontal Carousel -->
+        <!-- Horizontal Carousel with Virtualization -->
         <div v-if="filteredExtraCards.length > 0" class="flex-1 overflow-hidden">
-          <div class="h-full overflow-x-auto overflow-y-hidden pb-4">
-            <div class="flex gap-6 h-full items-center px-4 min-w-max">
+          <div 
+            ref="scrollContainer"
+            @scroll="onHorizontalScroll"
+            class="h-full overflow-x-auto overflow-y-hidden pb-4"
+          >
+            <div 
+              class="relative px-4" 
+              :style="{ width: totalScrollWidth + 'px', minWidth: '100%', height: '340px' }"
+            >
               <div 
-                v-for="card in filteredExtraCards" 
+                v-for="card in visibleExtraCards" 
                 :key="card.id"
-                class="shrink-0 flex flex-col items-center cursor-pointer hover:scale-105 transition-transform"
-                @click="openCardDetail(card)">
+                class="absolute top-2 flex flex-col items-center cursor-pointer hover:scale-105 transition-transform"
+                :style="{ 
+                  left: (card.visualIndex * ITEM_WIDTH_WITH_GAP) + 'px', 
+                  width: '180px' 
+                }"
+                @click="openCardDetail(card)"
+              >
                 
-                <div class="relative group mb-3 min-w-[180px]">
+                <div class="relative group mb-3 w-full">
                   <CardRenderer
                     :iscard="true" 
                     :identifier="card.identifier ? Number(card.identifier) : 0"  
                     :base="card.resource"
                     :cardType="getCardTypeForRenderer(card)"
+                    :lazy="true"
                   />
 
                   <!-- New Card Star Indicator -->
@@ -94,7 +107,7 @@
                 </div>
 
                 <!-- Card Info -->
-                <div class="text-center text-xs text-gray-600 max-w-[180px]">
+                <div class="text-center text-xs text-gray-600 w-full px-1">
                   <div class="font-semibold truncate">{{ getCardDescription(card.identifier) }}</div>
                   <div class="text-gray-500">{{ getCategoryName(card.identifier) }}</div>
                   <div class="text-gray-400">{{ getCardType(card) }}</div>
@@ -199,6 +212,38 @@ const selectedCategory = ref<number | ''>('')
 const selectedNumber = ref<number | ''>('')
 const { isNewlyOpened, clearNewlyOpenedCards } = useNewlyOpenedCards()
 
+// Virtualization Logic
+const ITEM_WIDTH_WITH_GAP = 204 // 180px card + 24px equivalent gap
+const scrollLeft = ref(0)
+const viewportWidth = ref(0)
+const scrollContainer = ref<HTMLElement | null>(null)
+
+const onHorizontalScroll = (e: Event) => {
+  scrollLeft.value = (e.target as HTMLElement).scrollLeft
+}
+
+const updateViewportWidth = () => {
+  if (scrollContainer.value) {
+    viewportWidth.value = scrollContainer.value.offsetWidth
+  }
+}
+
+import { onUnmounted, watch } from 'vue'
+
+watch(showModal, (isOpen) => {
+  if (isOpen) {
+    // Small delay to ensure DOM is rendered before measuring
+    setTimeout(updateViewportWidth, 100)
+    window.addEventListener('resize', updateViewportWidth)
+  } else {
+    window.removeEventListener('resize', updateViewportWidth)
+  }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateViewportWidth)
+})
+
 // Sorted categories by order
 const sortedCategories = computed(() => {
   return [...categoriesDatabase].sort((a, b) => a.order - b.order)
@@ -236,6 +281,31 @@ const filteredExtraCards = computed(() => {
 
     return true
   })
+})
+
+const totalScrollWidth = computed(() => {
+  return filteredExtraCards.value.length * ITEM_WIDTH_WITH_GAP
+})
+
+const visibleExtraCards = computed(() => {
+  if (viewportWidth.value === 0) {
+    return filteredExtraCards.value.slice(0, 10).map((card, index) => ({
+      ...card,
+      visualIndex: index
+    }))
+  }
+
+  const buffer = 2 // Items to render off-screen
+  const startIndex = Math.max(0, Math.floor(scrollLeft.value / ITEM_WIDTH_WITH_GAP) - buffer)
+  const endIndex = Math.min(
+    filteredExtraCards.value.length,
+    Math.ceil((scrollLeft.value + viewportWidth.value) / ITEM_WIDTH_WITH_GAP) + buffer
+  )
+
+  return filteredExtraCards.value.slice(startIndex, endIndex).map((card, index) => ({
+    ...card,
+    visualIndex: startIndex + index
+  }))
 })
 
 // Count cards that are not in album (repetidas/extras)

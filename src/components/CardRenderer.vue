@@ -116,9 +116,14 @@ interface Props {
   shouldRotate?: boolean;
   disposition?: string;
   cardType?: 'normal' | 'metal' | 'animated';
+  lazy?: boolean;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  lazy: false
+});
+
+const isVisible = ref(!props.lazy)
 
 const ifCardClasses = computed(() => {
   return props.iscard ? ' overflow-hidden  ' : '';
@@ -129,6 +134,7 @@ const isMetal = computed(() => {
 })
 
 const overlayImg = computed(() => {
+  if (props.lazy && !isVisible.value) return null
   return props.overlay ? props.overlay : defaultOverlay;
 });
 
@@ -179,9 +185,6 @@ const isVideoContent = computed(() => {
   return extension === 'mp4'
 })
 
-
-
-
 // Handle image loaded event
 function handleImageLoaded() {
   imageLoaded.value = true
@@ -192,8 +195,27 @@ watch(() => props.base, () => {
   imageLoaded.value = false
 }, { immediate: true })
 
+// If lazy, we could use an IntersectionObserver here, 
+// but for now we'll let the parent (VirtualScroller) control isVisible via a ref if needed,
+// or just rely on the fact that VirtualScroller only mounts these when visible.
+// For now, let's add a simple internal observer if lazy is true and component is mounted.
+import { onMounted } from 'vue'
+
+onMounted(() => {
+  if (props.lazy && !isVisible.value && cardElement.value) {
+    const observer = new IntersectionObserver((entries) => {
+      const firstEntry = entries[0]
+      if (firstEntry && firstEntry.isIntersecting) {
+        isVisible.value = true
+        observer.disconnect()
+      }
+    }, { rootMargin: '100px' })
+    observer.observe(cardElement.value)
+  }
+})
+
 // Expose to parent via template ref if needed
-defineExpose({ orientation, isVertical, isHorizontal })
+defineExpose({ orientation, isVertical, isHorizontal, isVisible })
 
 
 

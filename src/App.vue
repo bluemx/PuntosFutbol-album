@@ -1,21 +1,22 @@
-
 <template>
   <div class="min-h-screen w-full">
 
     <!-- Loading/Setup Phase -->
     <UserLoader v-if="!isReady" @ready="handleUserReady" />
-    
+
     <!-- Main Album Interface -->
-    <div v-else class="min-h-screen w-full flex flex-col overflow-auto gap-2 p-2 md:p-0 items-center justify-center bg-center bg-cover" :style="{ backgroundImage: `url(${mainbg})` }">
-      
+    <div v-else
+      class="min-h-screen w-full flex flex-col overflow-auto gap-2 p-2 md:p-0 items-center justify-center bg-center bg-cover"
+      :style="{ backgroundImage: `url(${mainbg})` }">
+
       <AlbumTopbar />
       <!-- Album Components -->
       <AlbumPages />
       <AlbumNavigation />
-      
+
       <!-- Welcome News Modal -->
       <WelcomeNewsModal />
-      
+
       <!-- Exchange Matches Modal -->
       <ExchangeMatchesModal />
     </div>
@@ -45,14 +46,14 @@ const handleUserReady = () => {
 const sendSizeToParent = () => {
   const appElement = document.getElementById('app')
   const height = appElement ? appElement.scrollHeight : window.innerHeight
-  
+
   const message = {
     type: 'iframeSize',
     width: window.innerWidth,
     height: height
   }
-  console.log('📏 Sending size to parent:', message)
-  
+  //console.log('📏 Sending size to parent:', message)
+
   // Always send, even if not in iframe (for testing)
   if (window.parent) {
     window.parent.postMessage(message, '*')
@@ -63,33 +64,33 @@ const sendSizeToParent = () => {
 onMounted(() => {
   // Send initial size immediately
   sendSizeToParent()
-  
+
   // Send size after a short delay to catch any rendering changes
   setTimeout(sendSizeToParent, 100)
   setTimeout(sendSizeToParent, 500)
   setTimeout(sendSizeToParent, 1000)
-  
+
   // Listen for resize events
   window.addEventListener('resize', sendSizeToParent)
-  
+
   // Listen for load event
   window.addEventListener('load', sendSizeToParent)
-  
+
   // Use ResizeObserver to detect any DOM changes that affect size
   const resizeObserver = new ResizeObserver(() => {
     sendSizeToParent()
   })
   resizeObserver.observe(document.body)
-  
-  // Store observer for cleanup
-  ;(window as any)._sizeObserver = resizeObserver
+
+    // Store observer for cleanup
+    ; (window as any)._sizeObserver = resizeObserver
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', sendSizeToParent)
   window.removeEventListener('load', sendSizeToParent)
   if ((window as any)._sizeObserver) {
-    ;(window as any)._sizeObserver.disconnect()
+    ; (window as any)._sizeObserver.disconnect()
   }
 })
 </script>

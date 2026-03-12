@@ -102,6 +102,7 @@
                   :identifier="getCardIdentifier(card.resource)"  
                   :base="card.resource"
                   :cardType="getCardTypeForRenderer(card)"
+                  :lazy="true"
                 />
               </div>
             </div>
@@ -209,6 +210,7 @@
                 :identifier="getCardIdentifier(card.resource)"  
                 :base="card.resource"
                 :cardType="getCardTypeForRenderer(card)"
+                :lazy="true"
                 ></CardRenderer>
 
               <!-- New Card Badge -->
@@ -289,6 +291,7 @@
             :identifier="getCardIdentifier(selectedCard.resource)"  
             :base="selectedCard.resource"
             :cardType="getCardTypeForRenderer(selectedCard)"
+            :lazy="false"
           />
         </div>
 
@@ -517,7 +520,7 @@ async function handleOpenAllPacks() {
     // Set all opened cards
     openedCards.value = allNewCards
     
-    // Generate random rotations for each card
+    // Generate random rotations for each card (though they won't be shown in reveal mode)
     cardRotations.value = openedCards.value.map(() => getRandomRotation())
     
     if (allNewCards.length > 0) {
@@ -528,45 +531,17 @@ async function handleOpenAllPacks() {
       selectedPack.value = null
     }
     
-    // Wait 3 seconds to show the pack animation
-    await new Promise(resolve => setTimeout(resolve, 3000))
-    
-    // Start card reveal sequence
+    // SKIP ANIMATIONS for "Open All Packs"
     isOpening.value = false
-    
-    if (openedCards.value.length > 0) {
-      revealingCards.value = true
-      currentRevealIndex.value = 0
-      
-      // Reveal cards one by one
-      const revealInterval = setInterval(() => {
-        currentRevealIndex.value++
-        if (currentRevealIndex.value >= openedCards.value.length) {
-          clearInterval(revealInterval)
-          // After all revealed, hide animation and show results
-          setTimeout(() => {
-            showOpeningAnimation.value = false
-            revealingCards.value = false
-            currentRevealIndex.value = 0
-          }, 1000)
-        }
-      }, 1000)
-    } else {
-      // If no cards (error case), just hide animation after a moment
-      setTimeout(() => {
-        showOpeningAnimation.value = false
-        revealingCards.value = false
-      }, 2000)
-    }
+    showOpeningAnimation.value = false
+    revealingCards.value = false
+    currentRevealIndex.value = 0
+
   } catch (error) {
     console.error('Failed to open all packs:', error)
     isOpening.value = false
-    
-    // Still show animation for a moment even on error
-    setTimeout(() => {
-      showOpeningAnimation.value = false
-      revealingCards.value = false
-    }, 2000)
+    showOpeningAnimation.value = false
+    revealingCards.value = false
   }
 }
 

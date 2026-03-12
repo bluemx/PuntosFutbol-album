@@ -152,40 +152,54 @@
             <p>No se encontraron estampas con los filtros seleccionados</p>
           </div>
           
-          <div v-else class="flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory">
+          <div 
+            ref="offerScrollContainer"
+            @scroll="onOfferScroll"
+            class="h-full overflow-x-auto overflow-y-hidden pb-4"
+          >
             <div 
-              v-for="card in filteredAvailableStickers" 
-              :key="card.id"
-              class="relative shrink-0 snap-start cursor-pointer flex flex-col items-center"
-              :class="{ 'ring-4 ring-pfblue': isInOffer(card.id) }"
-              @click="toggleOffer(card)">
-              
-              <div class="w-32 h-40 relative">
-                <CardRenderer
-                  :iscard="true"
-                  :identifier="card.identifier ? Number(card.identifier) : 0"
-                  :base="card.resource"
-                  :cardType="getCardTypeForRenderer(card)"
-                />
+              class="relative px-4" 
+              :style="{ width: totalOfferScrollWidth + 'px', minWidth: '100%', height: '260px' }"
+            >
+              <div 
+                v-for="card in visibleAvailableStickers" 
+                :key="card.id"
+                class="absolute top-2 flex flex-col items-center cursor-pointer hover:scale-105 transition-transform"
+                :style="{ 
+                  left: (card.visualIndex * OFFER_ITEM_WIDTH) + 'px', 
+                  width: '128px' 
+                }"
+                @click="toggleOffer(card)"
+              >
                 
-                <!-- Selection Indicator -->
-                <div 
-                  v-if="isInOffer(card.id)"
-                  class="absolute top-2 right-2 w-8 h-8 bg-pfblue rounded-full flex items-center justify-center shadow-lg">
-                  <Icon icon="mdi:check" class="w-6 h-6 text-white" />
+                <div class="relative w-32 h-40">
+                  <CardRenderer
+                    :iscard="true" 
+                    :identifier="card.identifier ? Number(card.identifier) : 0"  
+                    :base="card.resource" 
+                    :cardType="getCardTypeForRenderer(card)"
+                    :lazy="true"
+                  />
+
+                  <!-- Selection Indicator -->
+                  <div 
+                    v-if="isInOffer(card.id)"
+                    class="absolute top-2 right-2 w-8 h-8 bg-pfblue rounded-full flex items-center justify-center shadow-lg z-30">
+                    <Icon icon="mdi:check" class="w-6 h-6 text-white" />
+                  </div>
+
+                  <!-- Already in Album Indicator -->
+                  <div v-if="hasCardInAlbum(card.identifier)" class="absolute top-2 left-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full font-bold z-30">
+                    Repetida
+                  </div>
                 </div>
 
-                <!-- Already in Album Indicator -->
-                <div v-if="hasCardInAlbum(card.identifier)" class="absolute top-2 left-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full font-bold">
-                  Repetida
+                <!-- Card Info -->
+                <div class="text-center text-xs text-gray-600 max-w-32 mt-2">
+                  <div class="font-semibold truncate">{{ getCardDescription(card.identifier) }}</div>
+                  <div class="text-gray-500">{{ getCategoryName(card.identifier) }}</div>
+                  <div class="text-gray-400">{{ getCardType(card.identifier) }}</div>
                 </div>
-              </div>
-
-              <!-- Card Info -->
-              <div class="text-center text-xs text-gray-600 max-w-32 mt-2">
-                <div class="font-semibold truncate">{{ getCardDescription(card.identifier) }}</div>
-                <div class="text-gray-500">{{ getCategoryName(card.identifier) }}</div>
-                <div class="text-gray-400">{{ getCardType(card.identifier) }}</div>
               </div>
             </div>
           </div>
@@ -500,6 +514,37 @@ const myExchanges = ref<CurrentExchange[]>([])
 const isCancelling = ref<number | null>(null)
 const isRefreshing = ref(false)
 
+// Virtualization Logic for Offer Section
+const OFFER_ITEM_WIDTH = 140 // 128px card + 12px equivalent gap
+const offerScrollLeft = ref(0)
+const offerViewportWidth = ref(0)
+const offerScrollContainer = ref<HTMLElement | null>(null)
+
+const onOfferScroll = (e: Event) => {
+  offerScrollLeft.value = (e.target as HTMLElement).scrollLeft
+}
+
+const updateOfferViewportWidth = () => {
+  if (offerScrollContainer.value) {
+    offerViewportWidth.value = offerScrollContainer.value.offsetWidth
+  }
+}
+
+import { onUnmounted, watch } from 'vue'
+
+watch(showModal, (isOpen) => {
+  if (isOpen) {
+    setTimeout(updateOfferViewportWidth, 100)
+    window.addEventListener('resize', updateOfferViewportWidth)
+  } else {
+    window.removeEventListener('resize', updateOfferViewportWidth)
+  }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateOfferViewportWidth)
+})
+
 // Available stickers for offer (not in album)
 const availableStickers = computed(() => {
   return userStore.ownedCards
@@ -532,6 +577,31 @@ const filteredAvailableStickers = computed(() => {
 
     return true
   })
+})
+
+const totalOfferScrollWidth = computed(() => {
+  return filteredAvailableStickers.value.length * OFFER_ITEM_WIDTH
+})
+
+const visibleAvailableStickers = computed(() => {
+  if (offerViewportWidth.value === 0) {
+    return filteredAvailableStickers.value.slice(0, 10).map((card, index) => ({
+      ...card,
+      visualIndex: index
+    }))
+  }
+
+  const buffer = 3
+  const startIndex = Math.max(0, Math.floor(offerScrollLeft.value / OFFER_ITEM_WIDTH) - buffer)
+  const endIndex = Math.min(
+    filteredAvailableStickers.value.length,
+    Math.ceil((offerScrollLeft.value + offerViewportWidth.value) / OFFER_ITEM_WIDTH) + buffer
+  )
+
+  return filteredAvailableStickers.value.slice(startIndex, endIndex).map((card, index) => ({
+    ...card,
+    visualIndex: startIndex + index
+  }))
 })
 
 // Get identifiers of selected offer cards
